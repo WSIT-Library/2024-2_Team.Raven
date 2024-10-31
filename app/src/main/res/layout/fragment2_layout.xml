@@ -1,0 +1,176 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<RelativeLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    >
+    <ScrollView
+        android:layout_width="match_parent"
+        android:layout_height="match_parent">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:orientation="vertical"
+            android:padding="16dp">
+
+
+            <!-- 중간 섹션 - 내부 및 외부 공기 질 및 온도 (이미지 및 분할선 포함) -->
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:gravity="center"
+                android:orientation="vertical"
+                android:padding="16dp">
+
+
+                <!-- 현재 온도 -->
+                <TextView
+                    android:id="@+id/songTitle"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:gravity="center"
+                    android:text="현재 공기질"
+                    android:textSize="40sp"
+                    android:textStyle="bold" />
+            </LinearLayout>
+
+            <LinearLayout
+                android:id="@+id/environment_section1"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:padding="16dp">
+
+                <!-- 내부 섹션 -->
+                <LinearLayout
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:orientation="vertical"
+                    android:padding="8dp">
+
+
+                    <!-- 내부 온도 -->
+
+
+                    <!-- 가로 분할선 -->
+                    <View
+                        android:layout_width="match_parent"
+                        android:layout_height="3dp"
+                        android:layout_marginVertical="8dp"
+                        android:background="#CCCCCC" />
+
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent"/>
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent">
+                    <TextView
+                        android:id="@+id/text_view_air_quality"
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent"
+                        android:gravity="center"
+                        android:layout_weight="1"
+                        android:text="초기화를 진행해주세요." />
+                </LinearLayout>
+
+                    <View
+                        android:layout_width="match_parent"
+                        android:layout_height="3dp"
+                        android:layout_marginVertical="8dp"
+                        android:background="#CCCCCC" />
+
+                    <TextView
+                        android:id="@+id/text_view_location"
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent"
+                        android:text="초기화를 진행해주세요."
+                        android:textStyle="bold"
+                        android:textSize="13sp"
+                        android:gravity="center"
+                        />
+
+                </LinearLayout>
+            </LinearLayout>
+            <LinearLayout
+                android:id="@+id/environment_section2"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:padding="16dp">
+
+                <!-- 내부 섹션 -->
+                <LinearLayout
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:orientation="vertical"
+                    android:padding="8dp">
+
+
+                    <!-- 내부 온도 -->
+
+
+                    <TextView
+                        android:id="@+id/temperature_Inside"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+
+                        android:text="차량 내부 공기질"
+                        android:textColor="@android:color/black"
+                        android:textSize="16sp" />
+
+                    <!-- 가로 분할선 -->
+                    <View
+                        android:layout_width="match_parent"
+                        android:layout_height="3dp"
+                        android:layout_marginVertical="8dp"
+                        android:background="#CCCCCC" />
+                    <TextView
+                        android:id="@+id/text_view_bluetooth_data"
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent"
+                        android:gravity="center"
+                        android:layout_weight="1"
+                        android:text="차량을 연결해주세요." />
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent"/>
+
+
+                    <View
+                        android:layout_width="match_parent"
+                        android:layout_height="3dp"
+                        android:layout_marginVertical="8dp"
+                        android:background="#CCCCCC" />
+
+                    <TextView
+                        android:id="@+id/textView4"
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent"
+                        android:text="현재 차량의 공기질 상태가 좋지 않아요."
+                        android:textStyle="bold"
+                        android:textSize="13sp"
+                        android:gravity="center"
+                        />
+
+                </LinearLayout>
+            </LinearLayout>
+            <Button
+                android:id="@+id/button_get_air_quality"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:text="초기화"
+                android:layout_centerInParent="true" />
+        </LinearLayout>
+    </ScrollView>
+
+
+
+</RelativeLayout>
+
