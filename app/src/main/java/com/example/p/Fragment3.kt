@@ -1,9 +1,11 @@
 package com.example.p
 
+import SensorData
 import android.Manifest
 import android.bluetooth.BluetoothAdapter
 import android.bluetooth.BluetoothDevice
 import android.bluetooth.BluetoothSocket
+import android.content.Context
 import android.content.pm.PackageManager
 import android.os.Build
 import android.os.Bundle
@@ -26,6 +28,8 @@ import retrofit2.Response
 import java.io.IOException
 import java.io.InputStream
 import java.util.*
+import android.provider.Settings;
+
 
 class Fragment3 : Fragment() {
 
@@ -140,16 +144,37 @@ class Fragment3 : Fragment() {
                         for (i in 0 until bytesAvailable) {
                             val byte = buffer[i]
                             if (byte == '\n'.code.toByte()) {
-                                val message = String(readBuffer, 0, readBufferPosition, Charsets.UTF_8)
-                                readBufferPosition = 0
+                                val message = String(readBuffer, 0, readBufferPosition, Charsets.UTF_8).trim()
+                                readBufferPosition = 0  // 버퍼 초기화
 
-                                // 여기서 심박수 값을 서버에 전송
-                                sendDataToServer(message)
+                                // 데이터 파싱
+                                val dataParts = message.split("|")
+                                if (dataParts.size == 9) {
+                                    val heartRate = dataParts[0]
+                                    val CO = dataParts[1]
+                                    val Alcohol = dataParts[2]
+                                    val CO2 = dataParts[3]
+                                    val Tolueno = dataParts[4]
+                                    val NH4 = dataParts[5]
+                                    val Acetona = dataParts[6]
+                                    val temperature = dataParts[7]
+                                    val humidity = dataParts[8]
 
-                                handler.post {
-                                    textViewReceive.text = message
+                                    // 모든 센서 데이터를 서버로 전송
+                                    sendDataToServer(heartRate, CO, Alcohol, CO2, Tolueno, NH4, Acetona, temperature, humidity)
+
+                                    // 심박수 표시
+                                    handler.post {
+                                        textViewReceive.text = "심박수: $heartRate"
+                                    }
+
+                                    // Fragment2로 데이터 전송
+                                    val mainActivity = activity as? MainActivity
+                                    mainActivity?.onBluetoothDataReceived(CO, Alcohol, CO2, Tolueno, NH4, Acetona, temperature, humidity)
+                                } else {
+                                    Log.e("Bluetooth", "유효하지 않은 데이터 형식: $message")
                                 }
-                            } else {
+                            } else if (readBufferPosition < readBuffer.size) {
                                 readBuffer[readBufferPosition++] = byte
                             }
                         }
@@ -169,18 +194,29 @@ class Fragment3 : Fragment() {
         val mq135 = data.split(",").getOrNull(0) ?: "N/A"
         return mq135
     }
-    private fun sendDataToServer(heartRate: String) {
-        val heartRateData = HeartRateData(heartRate)
+    private fun sendDataToServer(
+        heartRate: String,
+        CO: String,
+        Alcohol: String,
+        CO2: String,
+        Tolueno: String,
+        NH4: String,
+        Acetona: String,
+        temperature: String,
+        humidity: String
+    ) {
+        val sensorData = SensorData(heartRate, CO, Alcohol, CO2, Tolueno, NH4, Acetona, temperature, humidity)
 
-        RetrofitClient.heartRateApiService.postHeartRate(heartRateData).enqueue(object : Callback<HeartRateResponse> {
-            override fun onResponse(call: Call<HeartRateResponse>, response: Response<HeartRateResponse>) {
+        RetrofitClient.sensorApiService.postSensorData(sensorData).enqueue(object : Callback<ServerResponse> {
+            override fun onResponse(call: Call<ServerResponse>, response: Response<ServerResponse>) {
                 if (response.isSuccessful) {
-                    Toast.makeText(context, "서버에 심박수 전송 성공", Toast.LENGTH_SHORT).show()
+                    Toast.makeText(context, "서버에 데이터 전송 성공", Toast.LENGTH_SHORT).show()
                 } else {
                     Toast.makeText(context, "서버 응답 오류: ${response.code()}", Toast.LENGTH_SHORT).show()
                 }
             }
-            override fun onFailure(call: Call<HeartRateResponse>, t: Throwable) {
+
+            override fun onFailure(call: Call<ServerResponse>, t: Throwable) {
                 Toast.makeText(context, "서버 전송 실패: ${t.message}", Toast.LENGTH_SHORT).show()
             }
         })

@@ -60,7 +60,16 @@ class Fragment2 : Fragment() {
     private fun displayBluetoothData() {
         val activity = activity as? MainActivity
         activity?.setBluetoothDataListener { data ->
-            textViewBluetoothData.text = "MQ135: ${data.mq135}"
+            textViewBluetoothData.text = """
+                CO: ${data.CO}
+                Alcohol: ${data.Alcohol}
+                CO2: ${data.CO2}
+                Tolueno: ${data.Tolueno}
+                NH4: ${data.NH4}
+                Acetona: ${data.Acetona}
+                온도: ${data.temperature}
+                습도: ${data.humidity}
+            """.trimIndent()
         }
     }
 

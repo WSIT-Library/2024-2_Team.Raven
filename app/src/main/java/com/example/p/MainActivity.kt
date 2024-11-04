@@ -62,10 +62,10 @@ class MainActivity : AppCompatActivity() {
     }
 
     // 블루투스 데이터 수신 처리
-    fun onBluetoothDataReceived(mq135: String) {
-        val data = AirQualityData(mq135)
+    fun onBluetoothDataReceived(CO: String, Alcohol: String, CO2: String, Tolueno: String, NH4: String, Acetona: String, temperature: String, humidity: String) {
+        val data = AirQualityData(CO, Alcohol, CO2, Tolueno, NH4, Acetona, temperature, humidity)
         bluetoothDataListener?.invoke(data)
     }
 }
 
-data class AirQualityData(val mq135: String)
+data class AirQualityData(val CO: String, val Alcohol: String, val CO2: String, val Tolueno: String, val NH4: String, val Acetona: String, val temperature: String, val humidity: String)
