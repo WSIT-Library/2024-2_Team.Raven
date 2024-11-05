@@ -18,6 +18,11 @@ class Fragment4 : Fragment() {
     private lateinit var bluetoothSocket: BluetoothSocket
     private lateinit var brightnessSeekBar: SeekBar
 
+    // Bluetooth 소켓을 Fragment3에서 전달받는 메서드
+    fun setBluetoothSocket(socket: BluetoothSocket) {
+        this.bluetoothSocket = socket
+    }
+
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
@@ -28,7 +33,9 @@ class Fragment4 : Fragment() {
         // SeekBar 변경 리스너 설정
         brightnessSeekBar.setOnSeekBarChangeListener(object : SeekBar.OnSeekBarChangeListener {
             override fun onProgressChanged(seekBar: SeekBar?, progress: Int, fromUser: Boolean) {
-                sendBrightnessValue(progress)
+                // RGB 값을 계산하여 전송
+                val rgbValue = calculateRGBValue(progress)
+                sendRGBValue(rgbValue)
             }
 
             override fun onStartTrackingTouch(seekBar: SeekBar?) {}
@@ -38,15 +45,25 @@ class Fragment4 : Fragment() {
         return view
     }
 
-    private fun sendBrightnessValue(brightness: Int) {
+    private fun calculateRGBValue(brightness: Int): String {
+        // RGB 값을 계산합니다. 여기서는 예시로 단순히 brightness 값을 R, G, B에 할당합니다.
+        val r = brightness
+        val g = brightness
+        val b = brightness
+        return "$r,$g,$b" // "R,G,B" 형식으로 반환
+    }
+
+    private fun sendRGBValue(rgbValue: String) {
         try {
             // Bluetooth 소켓을 통해 아두이노로 데이터 전송
             if (::bluetoothSocket.isInitialized && bluetoothSocket.isConnected) {
-                val value = "$brightness\n" // 아두이노에서 파싱하기 쉽게 줄바꿈 추가
+                val value = "$rgbValue\n" // 아두이노에서 파싱하기 쉽게 줄바꿈 추가
                 bluetoothSocket.outputStream.write(value.toByteArray())
             }
         } catch (e: IOException) {
             e.printStackTrace()
+            Toast.makeText(context, "데이터 전송 중 오류 발생", Toast.LENGTH_SHORT).show()
         }
     }
 }
+

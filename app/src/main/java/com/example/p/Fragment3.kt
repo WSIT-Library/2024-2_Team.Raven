@@ -29,8 +29,7 @@ import retrofit2.Response
 import java.io.IOException
 import java.io.InputStream
 import java.util.*
-import android.provider.Settings;
-
+import android.provider.Settings
 
 class Fragment3 : Fragment() {
 
@@ -116,6 +115,11 @@ class Fragment3 : Fragment() {
             Toast.makeText(context, "HC-06에 연결되었습니다.", Toast.LENGTH_SHORT).show()
 
             readDataFromBluetooth()
+
+            // Fragment4에 bluetoothSocket 전달
+            val fragment4 = Fragment4()
+            fragment4.setBluetoothSocket(bluetoothSocket!!)
+
         } catch (e: SecurityException) {
             Log.e("Bluetooth", "권한 오류: ${e.message}")
             Toast.makeText(context, "블루투스 권한이 없습니다.", Toast.LENGTH_SHORT).show()
@@ -191,11 +195,6 @@ class Fragment3 : Fragment() {
         workerThread?.start()
     }
 
-    private fun parseAirQualityData(data: String): String {
-        val mq135 = data.split(",").getOrNull(0) ?: "N/A"
-        return mq135
-    }
-
     private fun sendDataToServer(
         heartRate: String,
         CO: String,
@@ -225,29 +224,6 @@ class Fragment3 : Fragment() {
         })
     }
 
-    fun sendDeviceIdToServer(context: Context) {
-        // ANDROID_ID 가져오기
-        val deviceId = Settings.Secure.getString(context.contentResolver, Settings.Secure.ANDROID_ID)
-
-        val request = DeviceIdRequest(deviceId) // 요청 객체 생성
-
-        RetrofitClient.sensorApiService.sendDeviceId(request).enqueue(object : retrofit2.Callback<Void> {
-            override fun onResponse(call: Call<Void>, response: retrofit2.Response<Void>) {
-                if (response.isSuccessful) {
-                    // 전송 성공
-                    Toast.makeText(context, "디바이스 ID 전송 성공", Toast.LENGTH_SHORT).show()
-                } else {
-                    // 서버 응답 오류
-                    Toast.makeText(context, "서버 응답 오류: ${response.code()}", Toast.LENGTH_SHORT).show()
-                }
-            }
-
-            override fun onFailure(call: Call<Void>, t: Throwable) {
-                // 전송 실패
-                Toast.makeText(context, "서버 전송 실패: ${t.message}", Toast.LENGTH_SHORT).show()
-            }
-        })
-    }
     override fun onDestroyView() {
         super.onDestroyView()
         bluetoothSocket?.close()
