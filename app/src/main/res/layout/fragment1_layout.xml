@@ -271,7 +271,7 @@
                 android:id="@+id/textViewReceive"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="Heart Rate: -- BPM"
+                android:text="블루투스를 연결해주세요."
                 android:textSize="18sp"
                 android:textColor="@android:color/darker_gray"
                 android:layout_marginTop="8dp"/>

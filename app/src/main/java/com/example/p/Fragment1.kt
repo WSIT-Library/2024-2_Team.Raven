@@ -44,16 +44,10 @@ class Fragment1 : Fragment() {
 
         viewModel = ViewModelProvider(requireActivity()).get(BluetoothViewModel::class.java)
 
-        // ViewModel의 데이터 변경을 관찰하여 TextView에 업데이트
-        viewModel.receivedData.observe(viewLifecycleOwner, Observer { data ->
+        // ViewModel의 데이터를 관찰
+        viewModel.receivedData.observe(viewLifecycleOwner) { data ->
             textViewReceive.text = data
-        })
-
-        // FusedLocationProviderClient 초기화
-        fusedLocationClient = LocationServices.getFusedLocationProviderClient(requireActivity())
-
-        // 현재 위치와 온도를 가져옴
-        getCurrentLocationAndTemperature()
+        }
 
         return view
     }

@@ -23,6 +23,7 @@ import androidx.activity.result.contract.ActivityResultContracts
 import androidx.annotation.RequiresApi
 import androidx.core.app.ActivityCompat
 import androidx.fragment.app.Fragment
+import androidx.lifecycle.ViewModelProvider
 import retrofit2.Call
 import retrofit2.Callback
 import retrofit2.Response
@@ -39,10 +40,12 @@ class Fragment3 : Fragment() {
     private lateinit var bluetoothAdapter: BluetoothAdapter
     private var bluetoothSocket: BluetoothSocket? = null
     private lateinit var textViewReceive: TextView
+    private lateinit var textViewComment: TextView
     private lateinit var requestBluetoothPermissionLauncher: ActivityResultLauncher<Array<String>>
     private lateinit var readBuffer: ByteArray  // 버퍼 선언
     private var readBufferPosition: Int = 0  // 버퍼 위치 초기화
     private var workerThread: Thread? = null
+    private lateinit var viewModel: BluetoothViewModel // ViewModel 선언
 
     @RequiresApi(Build.VERSION_CODES.S)
     override fun onCreateView(
@@ -52,6 +55,10 @@ class Fragment3 : Fragment() {
         val view = inflater.inflate(R.layout.fragment3_layout, container, false)
 
         textViewReceive = view.findViewById(R.id.textViewReceive)
+        textViewComment = view.findViewById(R.id.textViewComment)
+
+        // ViewModel 초기화
+        viewModel = ViewModelProvider(requireActivity()).get(BluetoothViewModel::class.java)
 
         // 블루투스 어댑터 초기화
         bluetoothAdapter = BluetoothAdapter.getDefaultAdapter()
@@ -116,10 +123,6 @@ class Fragment3 : Fragment() {
 
             readDataFromBluetooth()
 
-            // Fragment4에 bluetoothSocket 전달
-            val fragment4 = Fragment4()
-            fragment4.setBluetoothSocket(bluetoothSocket!!)
-
         } catch (e: SecurityException) {
             Log.e("Bluetooth", "권한 오류: ${e.message}")
             Toast.makeText(context, "블루투스 권한이 없습니다.", Toast.LENGTH_SHORT).show()
@@ -165,17 +168,27 @@ class Fragment3 : Fragment() {
                                     val Acetona = dataParts[6]
                                     val temperature = dataParts[7]
                                     val humidity = dataParts[8]
+
                                     // 모든 센서 데이터를 서버로 전송
                                     sendDataToServer(heartRate, CO, Alcohol, CO2, Tolueno, NH4, Acetona, temperature, humidity)
 
                                     // 심박수 표시
                                     handler.post {
                                         textViewReceive.text = "심박수: $heartRate"
-                                    }
 
-                                    // Fragment2로 데이터 전송
-                                    val mainActivity = activity as? MainActivity
-                                    mainActivity?.onBluetoothDataReceived(CO, Alcohol, CO2, Tolueno, NH4, Acetona, temperature, humidity)
+                                        // heartRate 값을 ViewModel에 저장
+                                        viewModel.setReceivedData("현재 심박수 : $heartRate")
+
+                                        // heartRate 값에 따른 텍스트 설정
+                                        val heartRateValue = heartRate.toIntOrNull() ?: 0
+                                        val comment = when {
+                                            heartRateValue < 70 -> "현재 20대 평균 심박수(70~74)보다 낮아요."
+                                            heartRateValue in 70..74 -> "현재 심박수가 안정되어있어요."
+                                            heartRateValue >= 75 -> "현재 20대 평균 심박수(70~74)보다 높아요."
+                                            else -> ""
+                                        }
+                                        textViewComment.text = comment
+                                    }
                                 } else {
                                     Log.e("Bluetooth", "유효하지 않은 데이터 형식: $message")
                                 }
@@ -224,8 +237,13 @@ class Fragment3 : Fragment() {
         })
     }
 
-    override fun onDestroyView() {
-        super.onDestroyView()
-        bluetoothSocket?.close()
+    override fun onDestroy() {
+        super.onDestroy()
+        try {
+            workerThread?.interrupt()
+            bluetoothSocket?.close()
+        } catch (e: IOException) {
+            e.printStackTrace()
+        }
     }
 }

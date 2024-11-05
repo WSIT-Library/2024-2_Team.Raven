@@ -94,23 +94,15 @@
                         android:id="@+id/textViewReceive"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:text="수신된 메시지"
+                        android:text="블루투스를 연결해주세요."
                         android:textSize="18sp"
                         android:padding="16dp"
                         android:gravity="center"/>
                     <TextView
-                        android:id="@+id/textView4"
+                        android:id="@+id/textViewComment"
                         android:layout_width="match_parent"
                         android:layout_height="match_parent"
-                        android:text="오늘은 평소보다 심박수가 2bpm가량 높아요."
-                        android:textSize="16sp"
-                        android:gravity="center"
-                        />
-                    <TextView
-                        android:id="@+id/textView5"
-                        android:layout_width="match_parent"
-                        android:layout_height="match_parent"
-                        android:text="그리고 20대 평균 심박수(70~74)보다 높아요."
+                        android:text="블루투스를 연결해주세요."
                         android:textSize="16sp"
                         android:gravity="center"
                         />
