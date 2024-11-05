@@ -7,5 +7,6 @@ data class SensorData(
     val NH4: String,
     val Acetona: String,
     val temperature: String,
-    val humidity: String
+    val humidity: String,
+    val deviceId: String
 )

@@ -7,6 +7,7 @@ import android.bluetooth.BluetoothDevice
 import android.bluetooth.BluetoothSocket
 import android.content.Context
 import android.content.pm.PackageManager
+import android.hardware.usb.UsbDevice.getDeviceId
 import android.os.Build
 import android.os.Bundle
 import android.os.Handler
@@ -113,6 +114,7 @@ class Fragment3 : Fragment() {
             bluetoothSocket?.connect()
 
             Toast.makeText(context, "HC-06에 연결되었습니다.", Toast.LENGTH_SHORT).show()
+
             readDataFromBluetooth()
         } catch (e: SecurityException) {
             Log.e("Bluetooth", "권한 오류: ${e.message}")
@@ -159,7 +161,6 @@ class Fragment3 : Fragment() {
                                     val Acetona = dataParts[6]
                                     val temperature = dataParts[7]
                                     val humidity = dataParts[8]
-
                                     // 모든 센서 데이터를 서버로 전송
                                     sendDataToServer(heartRate, CO, Alcohol, CO2, Tolueno, NH4, Acetona, temperature, humidity)
 
@@ -194,6 +195,7 @@ class Fragment3 : Fragment() {
         val mq135 = data.split(",").getOrNull(0) ?: "N/A"
         return mq135
     }
+
     private fun sendDataToServer(
         heartRate: String,
         CO: String,
@@ -205,7 +207,8 @@ class Fragment3 : Fragment() {
         temperature: String,
         humidity: String
     ) {
-        val sensorData = SensorData(heartRate, CO, Alcohol, CO2, Tolueno, NH4, Acetona, temperature, humidity)
+        val deviceId = Settings.Secure.getString(requireContext().contentResolver, Settings.Secure.ANDROID_ID)
+        val sensorData = SensorData(heartRate, CO, Alcohol, CO2, Tolueno, NH4, Acetona, temperature, humidity, deviceId)
 
         RetrofitClient.sensorApiService.postSensorData(sensorData).enqueue(object : Callback<ServerResponse> {
             override fun onResponse(call: Call<ServerResponse>, response: Response<ServerResponse>) {
@@ -222,6 +225,29 @@ class Fragment3 : Fragment() {
         })
     }
 
+    fun sendDeviceIdToServer(context: Context) {
+        // ANDROID_ID 가져오기
+        val deviceId = Settings.Secure.getString(context.contentResolver, Settings.Secure.ANDROID_ID)
+
+        val request = DeviceIdRequest(deviceId) // 요청 객체 생성
+
+        RetrofitClient.sensorApiService.sendDeviceId(request).enqueue(object : retrofit2.Callback<Void> {
+            override fun onResponse(call: Call<Void>, response: retrofit2.Response<Void>) {
+                if (response.isSuccessful) {
+                    // 전송 성공
+                    Toast.makeText(context, "디바이스 ID 전송 성공", Toast.LENGTH_SHORT).show()
+                } else {
+                    // 서버 응답 오류
+                    Toast.makeText(context, "서버 응답 오류: ${response.code()}", Toast.LENGTH_SHORT).show()
+                }
+            }
+
+            override fun onFailure(call: Call<Void>, t: Throwable) {
+                // 전송 실패
+                Toast.makeText(context, "서버 전송 실패: ${t.message}", Toast.LENGTH_SHORT).show()
+            }
+        })
+    }
     override fun onDestroyView() {
         super.onDestroyView()
         bluetoothSocket?.close()

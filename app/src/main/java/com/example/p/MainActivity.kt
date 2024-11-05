@@ -1,5 +1,6 @@
 package com.example.p
-
+import android.content.Context
+import android.provider.Settings
 import android.Manifest
 import android.app.AlertDialog
 import android.bluetooth.BluetoothAdapter
@@ -65,6 +66,9 @@ class MainActivity : AppCompatActivity() {
     fun onBluetoothDataReceived(CO: String, Alcohol: String, CO2: String, Tolueno: String, NH4: String, Acetona: String, temperature: String, humidity: String) {
         val data = AirQualityData(CO, Alcohol, CO2, Tolueno, NH4, Acetona, temperature, humidity)
         bluetoothDataListener?.invoke(data)
+    }
+    fun getDeviceId(context: Context): String {
+        return Settings.Secure.getString(context.contentResolver, Settings.Secure.ANDROID_ID)
     }
 }
 
