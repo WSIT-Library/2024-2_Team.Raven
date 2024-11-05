@@ -81,11 +81,13 @@
                         android:layout_marginVertical="8dp"
                         android:background="#CCCCCC" />
 
+                    <!-- 밝기 범위 설정 (0-255) -->
+
                     <SeekBar
                         android:id="@+id/brightnessSeekBar"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:max="255" />  <!-- 밝기 범위 설정 (0-255) -->
+                        android:max="255" />
 
                     <TextView
                         android:id="@+id/brightnessValueText"
