@@ -123,6 +123,11 @@ class Fragment3 : Fragment() {
 
             readDataFromBluetooth()
 
+            // Fragment4에 bluetoothSocket 전달
+            val fragment4 = Fragment4()
+            fragment4.setBluetoothSocket(bluetoothSocket!!)
+
+
         } catch (e: SecurityException) {
             Log.e("Bluetooth", "권한 오류: ${e.message}")
             Toast.makeText(context, "블루투스 권한이 없습니다.", Toast.LENGTH_SHORT).show()
@@ -174,21 +179,13 @@ class Fragment3 : Fragment() {
 
                                     // 심박수 표시
                                     handler.post {
-                                        textViewReceive.text = "심박수: $heartRate"
+                                        textViewReceive.text = "BPM : $heartRate"
 
-                                        // heartRate 값을 ViewModel에 저장
-                                        viewModel.setReceivedData("현재 심박수 : $heartRate")
-
-                                        // heartRate 값에 따른 텍스트 설정
-                                        val heartRateValue = heartRate.toIntOrNull() ?: 0
-                                        val comment = when {
-                                            heartRateValue < 70 -> "현재 20대 평균 심박수(70~74)보다 낮아요."
-                                            heartRateValue in 70..74 -> "현재 심박수가 안정되어있어요."
-                                            heartRateValue >= 75 -> "현재 20대 평균 심박수(70~74)보다 높아요."
-                                            else -> ""
-                                        }
-                                        textViewComment.text = comment
+                                        // Fragment2로 데이터 전송
+                                        val mainActivity = activity as? MainActivity
+                                        mainActivity?.onBluetoothDataReceived(CO, Alcohol, CO2, Tolueno, NH4, Acetona, temperature, humidity)
                                     }
+
                                 } else {
                                     Log.e("Bluetooth", "유효하지 않은 데이터 형식: $message")
                                 }

@@ -76,7 +76,7 @@
                         android:id="@+id/currentTime"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:layout_gravity="start"
+                        android:layout_weight="1"
                         android:text="00:00" />
 
                     <!-- 총 시간 -->
@@ -84,7 +84,6 @@
                         android:id="@+id/totalTime"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:layout_gravity="end"
                         android:text="03:30" />
                 </LinearLayout>
 
@@ -94,6 +93,7 @@
 
 
             <!-- 중간 섹션 - 내부 및 외부 공기 질 및 온도 (이미지 및 분할선 포함) -->
+
             <LinearLayout
                 android:id="@+id/environment_section"
                 android:layout_width="match_parent"
@@ -123,7 +123,7 @@
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:text="Air Quality (Inside)"
-                        android:textSize="16sp" />
+                        android:textSize="14sp" />
 
                     <TextView
                         android:id="@+id/air_quality_inside"
@@ -158,10 +158,10 @@
                         android:src="@drawable/sun12" />
 
                     <TextView
-                        android:id="@+id/temperature_Outside2"
+                        android:id="@+id/textViewTemperature_Car"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:text="28°C"
+                        android:text="블루투스를 연결해주세요."
                         android:textSize="14sp" />
 
                 </LinearLayout>
@@ -195,7 +195,7 @@
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:text="Air Quality (Outside)"
-                        android:textSize="16sp" />
+                        android:textSize="14sp" />
 
                     <TextView
                         android:id="@+id/air_quality_outside"
@@ -243,7 +243,7 @@
                     <TextView
                         android:id="@+id/textViewLocation"
                         android:layout_width="wrap_content"
-                        android:layout_height="19dp"
+                        android:layout_height="wrap_content"
                         android:layout_marginTop="16dp"
                         android:text="현재 위치를 가져오는 중..." />
 
@@ -291,7 +291,7 @@
                 android:id="@+id/airQualityValue"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="Air Quality: Good"
+                android:text="블루투스를 연결해주세요."
                 android:textSize="18sp"
                 android:textColor="@android:color/darker_gray"
                 android:layout_marginTop="8dp"/>

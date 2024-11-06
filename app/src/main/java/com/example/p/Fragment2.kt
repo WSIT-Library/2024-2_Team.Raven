@@ -52,7 +52,6 @@ class Fragment2 : Fragment() {
                 getLocationInfo(lat, lon, textViewLocation)
             }
         }
-
         // 블루투스 데이터 표시 초기화
         displayBluetoothData()
     }
@@ -61,14 +60,14 @@ class Fragment2 : Fragment() {
         val activity = activity as? MainActivity
         activity?.setBluetoothDataListener { data ->
             textViewBluetoothData.text = """
-                CO: ${data.CO}
-                Alcohol: ${data.Alcohol}
-                CO2: ${data.CO2}
-                Tolueno: ${data.Tolueno}
-                NH4: ${data.NH4}
-                Acetona: ${data.Acetona}
-                온도: ${data.temperature}
-                습도: ${data.humidity}
+                CO : ${data.CO}
+                Alcohol : ${data.Alcohol}
+                CO2 : ${data.CO2}
+                Tolueno : ${data.Tolueno}
+                NH4 : ${data.NH4}
+                Acetona : ${data.Acetona}
+                온도 : ${data.temperature}
+                습도  : ${data.humidity}
             """.trimIndent()
         }
     }

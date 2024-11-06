@@ -7,6 +7,6 @@ import retrofit2.http.POST
 import com.example.p.HeartRateResponse
 
 interface HeartRateApiService {
-    @POST("https://4b83-210-93-86-104.ngrok-free.app/heart-rate") // 엔드포인트 경로를 적절히 설정
+    @POST("https://eb3d-210-93-86-104.ngrok-free.app/send-data") // 엔드포인트 경로를 적절히 설정
     fun postHeartRate(@Body heartRateData: HeartRateData): Call<HeartRateResponse>
 }
