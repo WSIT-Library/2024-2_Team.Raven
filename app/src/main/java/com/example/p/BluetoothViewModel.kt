@@ -1,5 +1,6 @@
 package com.example.p
 
+import android.bluetooth.BluetoothSocket
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
@@ -11,6 +12,7 @@ class BluetoothViewModel : ViewModel() {
     private val _heartRate = MutableLiveData<String>()
     val heartRate: LiveData<String> get() = _heartRate
 
+    var bluetoothSocket: BluetoothSocket? = null
     fun setHeartRate(value: String) {
         _heartRate.value = value
     }

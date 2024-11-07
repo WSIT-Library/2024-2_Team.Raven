@@ -105,8 +105,6 @@ class Fragment3 : Fragment() {
                 )
             )
         } else {
-            // 연결 중 팝업창 표시
-           // showConnectingDialog()
             connectToBluetoothDevice()
         }
     }
@@ -133,25 +131,15 @@ class Fragment3 : Fragment() {
 
         try {
             val device: BluetoothDevice = bluetoothAdapter.getRemoteDevice(HC06_MAC_ADDRESS)
-
             bluetoothSocket = device.createRfcommSocketToServiceRecord(UUID_HC06)
             bluetoothSocket?.connect()
-            if (bluetoothSocket?.isConnected == true) {
-                Log.e("Bluetooth", "연결 성공: ${bluetoothSocket?.remoteDevice?.name}")
-                val fragment4 = Fragment4()
-                fragment4.setBluetoothSocket(bluetoothSocket!!)
-            } else {
-                Log.e("Bluetooth", "연결 실패")
-                Toast.makeText(context, "Bluetooth 연결 실패", Toast.LENGTH_SHORT).show()
-            }
 
             Toast.makeText(context, "HC-06에 연결되었습니다.", Toast.LENGTH_SHORT).show()
-          //  dismissConnectingDialog()  // 연결 성공 시 팝업창 닫기
-            readDataFromBluetooth()
+            // Save the socket in the ViewModel
+            viewModel.bluetoothSocket = bluetoothSocket
 
-            // Fragment4에 bluetoothSocket 전달
-            val fragment4 = Fragment4()
-            fragment4.setBluetoothSocket(bluetoothSocket!!)
+            // Start reading data
+            readDataFromBluetooth()
 
         } catch (e: SecurityException) {
             Log.e("Bluetooth", "권한 오류: ${e.message}")
