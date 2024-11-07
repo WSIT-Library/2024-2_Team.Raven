@@ -102,7 +102,7 @@
                         android:id="@+id/textViewComment"
                         android:layout_width="match_parent"
                         android:layout_height="match_parent"
-                        android:text="블루투스를 연결해주세요."
+                        android:text=""
                         android:textSize="16sp"
                         android:gravity="center"
                         />

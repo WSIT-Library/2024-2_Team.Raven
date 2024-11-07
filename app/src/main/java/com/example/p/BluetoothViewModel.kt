@@ -13,6 +13,7 @@ class BluetoothViewModel : ViewModel() {
     val heartRate: LiveData<String> get() = _heartRate
 
     var bluetoothSocket: BluetoothSocket? = null
+
     fun setHeartRate(value: String) {
         _heartRate.value = value
     }
@@ -23,6 +24,16 @@ class BluetoothViewModel : ViewModel() {
     val temperature: MutableLiveData<String> = MutableLiveData()
     fun updateTemperature(temp: String) {
         temperature.value = temp
+    }
+
+
+    // SeekBar progress 값을 저장할 LiveData 추가
+    private val _brightnessValue = MutableLiveData<Int>()
+    val brightnessValue: LiveData<Int> get() = _brightnessValue
+
+    // progress 값 변경 시 호출되는 함수
+    fun setBrightnessValue(value: Int) {
+        _brightnessValue.value = value
     }
 
 }

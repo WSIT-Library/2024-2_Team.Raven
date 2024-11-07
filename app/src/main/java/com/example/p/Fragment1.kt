@@ -31,6 +31,7 @@ class Fragment1 : Fragment() {
     private lateinit var textViewLocation: TextView // 위치 정보를 표시할 TextView
     private lateinit var textViewTemperature: TextView // 온도 표시할 TextView
     private lateinit var textViewTemperatureCar: TextView // 온도 표시할 TextView
+    private lateinit var AirQualityValue: TextView // 공기질 표시할 TextView
     private lateinit var fusedLocationClient: FusedLocationProviderClient
     private val apiKey = "9429534b80a3def05a32e862c426f83c" // OpenWeather API 키
 
@@ -43,6 +44,7 @@ class Fragment1 : Fragment() {
         textViewLocation = view.findViewById(R.id.textViewLocation) // 위치 정보를 표시할 TextView
         textViewTemperature = view.findViewById(R.id.textViewTemperature) // 온도 표시할 TextView
         textViewTemperatureCar = view.findViewById(R.id.textViewTemperature_Car) // 온도 표시할 TextView
+        AirQualityValue = view.findViewById(R.id.airQualityValue) // 공기질 표시할 TextView
 
         viewModel = ViewModelProvider(requireActivity()).get(BluetoothViewModel::class.java)
 
@@ -63,6 +65,12 @@ class Fragment1 : Fragment() {
         viewModel.temperature.observe(viewLifecycleOwner, Observer { temperature ->
             textViewTemperatureCar.text = "$temperature°C"
         })
+        // ViewModel에서 brightnessValue를 관찰하여 TextView에 업데이트
+        viewModel.brightnessValue.observe(viewLifecycleOwner, Observer { brightness ->
+            // progress 값을 AirQualityValue에 표시
+            AirQualityValue.text = "밝기 : $brightness"
+        })
+
 
         return view
     }

@@ -28,6 +28,10 @@ class Fragment2 : Fragment() {
     private val apiKey = "9429534b80a3def05a32e862c426f83c"
     private lateinit var fusedLocationClient: FusedLocationProviderClient
     private lateinit var textViewBluetoothData: TextView
+    private lateinit var textViewInside: TextView
+    private lateinit var textViewOutside: TextView
+    private var airQualityAQI: Int? = null
+    private var bluetoothAQI: Int? = null
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -45,6 +49,8 @@ class Fragment2 : Fragment() {
         val textViewAirQuality: TextView = view.findViewById(R.id.text_view_air_quality)
         val textViewLocation: TextView = view.findViewById(R.id.text_view_location)
         textViewBluetoothData = view.findViewById(R.id.text_view_bluetooth_data)
+        textViewInside = view.findViewById(R.id.text_view_inside)
+        textViewOutside = view.findViewById(R.id.text_view_outside)
 
         buttonGetAirQuality.setOnClickListener {
             getCurrentLocation { lat, lon ->
@@ -56,24 +62,20 @@ class Fragment2 : Fragment() {
         displayBluetoothData()
     }
 
-
-
     private fun displayBluetoothData() {
         val activity = activity as? MainActivity
         activity?.setBluetoothDataListener { data ->
-            // data.CO가 문자열 형태로 제공되면 이를 Float으로 변환
             val co = try {
-                data.CO.toFloat() // CO 값을 Float으로 변환
+                data.CO.toFloat()
             } catch (e: NumberFormatException) {
-                0f // 변환에 실패하면 기본값으로 0f
+                0f
             }
 
-            // AQI 값을 계산
-            val aqi = calculateAQI(co)
+            bluetoothAQI = calculateAQI(co)
 
             // Bluetooth 데이터와 AQI 값을 텍스트뷰에 출력
             textViewBluetoothData.text = """
-            AQI : $aqi
+            AQI : $bluetoothAQI
             CO : $co
             Alcohol : ${data.Alcohol}
             CO2 : ${data.CO2}
@@ -83,18 +85,20 @@ class Fragment2 : Fragment() {
             온도 : ${data.temperature}
             습도  : ${data.humidity}
         """.trimIndent()
+
+            // AQI 값 비교
+            compareAQIValues()
         }
     }
 
     private fun calculateAQI(co: Float): Int {
-        // CO 농도에 따른 AQI 계산 공식을 사용
         return when {
-            co <= 4.4 -> ((co / 4.4) * 50).toInt() // Good
-            co <= 9.4 -> ((co - 4.4) / 5 * 50 + 50).toInt() // Moderate
-            co <= 12.4 -> ((co - 9.4) / 3 * 50 + 100).toInt() // Unhealthy for Sensitive Groups
-            co <= 15.4 -> ((co - 12.4) / 3 * 50 + 150).toInt() // Unhealthy
-            co <= 30.4 -> ((co - 15.4) / 15 * 50 + 200).toInt() // Very Unhealthy
-            else -> 300 // Hazardous
+            co <= 4.4 -> ((co / 4.4) * 50).toInt()
+            co <= 9.4 -> ((co - 4.4) / 5 * 50 + 50).toInt()
+            co <= 12.4 -> ((co - 9.4) / 3 * 50 + 100).toInt()
+            co <= 15.4 -> ((co - 12.4) / 3 * 50 + 150).toInt()
+            co <= 30.4 -> ((co - 15.4) / 15 * 50 + 200).toInt()
+            else -> 300
         }
     }
 
@@ -115,38 +119,36 @@ class Fragment2 : Fragment() {
         })
     }
 
+    // getAirQuality 함수 수정
     private fun getAirQuality(lat: Double, lon: Double, textView: TextView) {
         val call = RetrofitClient.airQualityApiService.getAirQuality(lat, lon, apiKey)
         call.enqueue(object : Callback<AirQualityResponse> {
             override fun onResponse(call: Call<AirQualityResponse>, response: Response<AirQualityResponse>) {
-                Log.d("Request URL", "https://api.openweathermap.org/data/2.5/air_pollution?lat=$lat&lon=$lon&appid=$apiKey")
                 if (response.isSuccessful) {
                     val airQualityResponse = response.body()
                     val components = airQualityResponse?.list?.get(0)?.components
-                    val aqi = airQualityResponse?.list?.get(0)?.main?.aqi  // AQI 값 추가
+                    val aqi = airQualityResponse?.list?.get(0)?.main?.aqi
+                    airQualityAQI = aqi // AQI 값을 저장
+
                     if (components != null) {
-                        val co = components.co
-                        val no = components.no
-                        val no2 = components.no2
-                        val o3 = components.o3
-                        val so2 = components.so2
-                        val pm2_5 = components.pm2_5
-                        val pm10 = components.pm10
-                        val nh3 = components.nh3
+                        // 기존 데이터 출력
                         textView.text = """
                         AQI : $aqi
-                        CO : $co ppm
-                        NO : $no ppm
-                        NO2 : $no2 ppm
-                        O3 : $o3 ppm
-                        SO2 : $so2 ppm
-                        PM2.5 : $pm2_5 µg/m³
-                        PM10 : $pm10 µg/m³
-                        NH3 : $nh3 ppm
+                        CO : ${components.co} ppm
+                        NO : ${components.no} ppm
+                        NO2 : ${components.no2} ppm
+                        O3 : ${components.o3} ppm
+                        SO2 : ${components.so2} ppm
+                        PM2.5 : ${components.pm2_5} µg/m³
+                        PM10 : ${components.pm10} µg/m³
+                        NH3 : ${components.nh3} ppm
                     """.trimIndent()
                     } else {
                         textView.text = "No components data available."
                     }
+
+                    // AQI 값 비교 호출
+                    compareAQIValues()
                 } else {
                     Toast.makeText(requireContext(), "Error: ${response.code()} ${response.message()}", Toast.LENGTH_SHORT).show()
                 }
@@ -158,31 +160,38 @@ class Fragment2 : Fragment() {
         })
     }
 
+
+
+
     private fun getLocationInfo(lat: Double, lon: Double, textView: TextView) {
         val geocoder = Geocoder(requireContext(), Locale.getDefault())
         val addresses: List<Address>? = geocoder.getFromLocation(lat, lon, 1)
         if (!addresses.isNullOrEmpty()) {
             val address = addresses[0]
-
-            val thoroughfare = address.thoroughfare ?: "" // 도로명
-            val subLocality = address.subLocality ?: "" // 동/읍/면
-            val locality = address.locality ?: "" // 시/군/구
-            val adminArea = address.adminArea ?: "" // 도/광역시
-            val country = address.countryName ?: "" // 나라 이름
-
-            // 필요한 정보를 조합해서 표시
+            val thoroughfare = address.thoroughfare ?: ""
+            val subLocality = address.subLocality ?: ""
+            val locality = address.locality ?: ""
+            val adminArea = address.adminArea ?: ""
             val locationInfo = buildString {
                 if (adminArea.isNotEmpty() && locality.isEmpty()) append("현재 $adminArea ")
                 if (thoroughfare.isNotEmpty()) append("$thoroughfare ")
                 if (locality.isNotEmpty()) append("$locality ")
-                if (subLocality.isNotEmpty()) append("$subLocality 의 현재 공기질 상태에요.") // + 제거
+                if (subLocality.isNotEmpty()) append("$subLocality 의 현재 공기질 상태에요.")
             }
-
             textView.text = locationInfo
         } else {
             textView.text = "주소 정보를 가져올 수 없습니다."
         }
     }
 
+    private fun compareAQIValues() {
+        if (airQualityAQI != null && bluetoothAQI != null) {
+            val comparisonResult = when {
+                bluetoothAQI!! > airQualityAQI!! -> "현재 차량 공기질의 상태는"
+                bluetoothAQI!! < airQualityAQI!! -> "현재 차량 공기질의 상태는"
+                else -> "현재 차량 공기질의 상태는"
+            }
+            textViewInside.text = comparisonResult
+        }
+    }
 }
-

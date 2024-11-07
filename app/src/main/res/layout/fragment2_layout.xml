@@ -150,16 +150,6 @@
                         android:layout_marginVertical="8dp"
                         android:background="#CCCCCC" />
 
-                    <TextView
-                        android:id="@+id/textView4"
-                        android:layout_width="match_parent"
-                        android:layout_height="match_parent"
-                        android:text="현재 차량의 공기질 상태가 좋지 않아요."
-                        android:textStyle="bold"
-                        android:textSize="13sp"
-                        android:gravity="center"
-                        />
-
                 </LinearLayout>
             </LinearLayout>
             <Button
@@ -168,6 +158,22 @@
                 android:layout_height="match_parent"
                 android:text="초기화"
                 android:layout_centerInParent="true" />
+
+            <TextView
+                android:id="@+id/text_view_inside"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:gravity="center"
+                android:text="현재 외부와 비교하여 차량의 공기질 상태는"
+                android:textSize="16sp" />
+            <TextView
+                android:id="@+id/text_view_outside"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:gravity="center"
+                android:text="양호한 편이에요."
+                android:textSize="16sp"
+                android:textStyle="bold" />
         </LinearLayout>
     </ScrollView>
 
