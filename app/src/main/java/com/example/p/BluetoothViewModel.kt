@@ -8,7 +8,19 @@ class BluetoothViewModel : ViewModel() {
     private val _receivedData = MutableLiveData<String>()
     val receivedData: LiveData<String> get() = _receivedData
 
-    fun setReceivedData(data: String) {
-        _receivedData.value = data
+    private val _heartRate = MutableLiveData<String>()
+    val heartRate: LiveData<String> get() = _heartRate
+
+    fun setHeartRate(value: String) {
+        _heartRate.value = value
     }
+
+    fun setReceivedData(value: String) {
+        _receivedData.value = value
+    }
+    val temperature: MutableLiveData<String> = MutableLiveData()
+    fun updateTemperature(temp: String) {
+        temperature.value = temp
+    }
+
 }

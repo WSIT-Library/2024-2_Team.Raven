@@ -91,9 +91,15 @@
             </LinearLayout>
 
 
-
+            <TextView
+                android:id="@+id/textViewLocation"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="16dp"
+                android:text="현재 위치를 가져오는 중..."
+                android:textSize="17sp"
+                android:textStyle="bold" />
             <!-- 중간 섹션 - 내부 및 외부 공기 질 및 온도 (이미지 및 분할선 포함) -->
-
             <LinearLayout
                 android:id="@+id/environment_section"
                 android:layout_width="match_parent"
@@ -237,15 +243,8 @@
                         android:id="@+id/textViewTemperature"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:text="22°C"
+                        android:text="현재 위치를 가져오는 중..."
                         android:textSize="14sp" />
-
-                    <TextView
-                        android:id="@+id/textViewLocation"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:layout_marginTop="16dp"
-                        android:text="현재 위치를 가져오는 중..." />
 
                 </LinearLayout>
             </LinearLayout>

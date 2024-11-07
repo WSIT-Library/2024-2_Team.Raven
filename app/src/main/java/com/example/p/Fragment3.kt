@@ -2,6 +2,7 @@ package com.example.p
 
 import SensorData
 import android.Manifest
+import android.app.AlertDialog
 import android.bluetooth.BluetoothAdapter
 import android.bluetooth.BluetoothDevice
 import android.bluetooth.BluetoothSocket
@@ -36,6 +37,7 @@ class Fragment3 : Fragment() {
 
     private val HC06_MAC_ADDRESS = "98:D3:91:FD:F6:02"  // HC-06의 MAC 주소
     private val UUID_HC06: UUID = UUID.fromString("00001101-0000-1000-8000-00805F9B34FB")
+    private var connectingDialog: AlertDialog? = null
 
     private lateinit var bluetoothAdapter: BluetoothAdapter
     private var bluetoothSocket: BluetoothSocket? = null
@@ -103,8 +105,24 @@ class Fragment3 : Fragment() {
                 )
             )
         } else {
+            // 연결 중 팝업창 표시
+           // showConnectingDialog()
             connectToBluetoothDevice()
         }
+    }
+
+    private fun showConnectingDialog() {
+        // "연결 중입니다..." 메시지 팝업창 생성
+        val builder = AlertDialog.Builder(requireContext())
+        builder.setMessage("연결 중입니다...")
+        builder.setCancelable(false)  // 사용자가 닫지 못하도록 설정
+        connectingDialog = builder.create()
+        connectingDialog?.show()
+    }
+
+    private fun dismissConnectingDialog() {
+        // 팝업창 닫기
+        connectingDialog?.dismiss()
     }
 
     private fun connectToBluetoothDevice() {
@@ -118,21 +136,30 @@ class Fragment3 : Fragment() {
 
             bluetoothSocket = device.createRfcommSocketToServiceRecord(UUID_HC06)
             bluetoothSocket?.connect()
+            if (bluetoothSocket?.isConnected == true) {
+                Log.e("Bluetooth", "연결 성공: ${bluetoothSocket?.remoteDevice?.name}")
+                val fragment4 = Fragment4()
+                fragment4.setBluetoothSocket(bluetoothSocket!!)
+            } else {
+                Log.e("Bluetooth", "연결 실패")
+                Toast.makeText(context, "Bluetooth 연결 실패", Toast.LENGTH_SHORT).show()
+            }
 
             Toast.makeText(context, "HC-06에 연결되었습니다.", Toast.LENGTH_SHORT).show()
-
+          //  dismissConnectingDialog()  // 연결 성공 시 팝업창 닫기
             readDataFromBluetooth()
 
             // Fragment4에 bluetoothSocket 전달
             val fragment4 = Fragment4()
             fragment4.setBluetoothSocket(bluetoothSocket!!)
 
-
         } catch (e: SecurityException) {
             Log.e("Bluetooth", "권한 오류: ${e.message}")
+         //   dismissConnectingDialog()  // 연결 성공 시 팝업창 닫기
             Toast.makeText(context, "블루투스 권한이 없습니다.", Toast.LENGTH_SHORT).show()
         } catch (e: Exception) {
             Log.e("Bluetooth", "연결 실패: ${e.message}")
+          //  dismissConnectingDialog()  // 연결 성공 시 팝업창 닫기
             Toast.makeText(context, "연결에 실패했습니다.", Toast.LENGTH_SHORT).show()
         }
     }
@@ -174,12 +201,18 @@ class Fragment3 : Fragment() {
                                     val temperature = dataParts[7]
                                     val humidity = dataParts[8]
 
+
                                     // 모든 센서 데이터를 서버로 전송
                                     sendDataToServer(heartRate, CO, Alcohol, CO2, Tolueno, NH4, Acetona, temperature, humidity)
 
                                     // 심박수 표시
                                     handler.post {
                                         textViewReceive.text = "BPM : $heartRate"
+
+                                        // ViewModel에 심박수 값 설정
+                                        viewModel.setHeartRate(heartRate)
+                                        // ViewModel에 온도 값 설정
+                                        viewModel.updateTemperature(temperature)
 
                                         // Fragment2로 데이터 전송
                                         val mainActivity = activity as? MainActivity
@@ -222,7 +255,7 @@ class Fragment3 : Fragment() {
         RetrofitClient.sensorApiService.postSensorData(sensorData).enqueue(object : Callback<ServerResponse> {
             override fun onResponse(call: Call<ServerResponse>, response: Response<ServerResponse>) {
                 if (response.isSuccessful) {
-                    Toast.makeText(context, "서버에 데이터 전송 성공", Toast.LENGTH_SHORT).show()
+                    //Toast.makeText(context, "서버에 데이터 전송 성공", Toast.LENGTH_SHORT).show()
                 } else {
                     Toast.makeText(context, "서버 응답 오류: ${response.code()}", Toast.LENGTH_SHORT).show()
                 }

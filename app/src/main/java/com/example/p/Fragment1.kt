@@ -30,6 +30,7 @@ class Fragment1 : Fragment() {
     private lateinit var textViewReceive: TextView
     private lateinit var textViewLocation: TextView // 위치 정보를 표시할 TextView
     private lateinit var textViewTemperature: TextView // 온도 표시할 TextView
+    private lateinit var textViewTemperatureCar: TextView // 온도 표시할 TextView
     private lateinit var fusedLocationClient: FusedLocationProviderClient
     private val apiKey = "9429534b80a3def05a32e862c426f83c" // OpenWeather API 키
 
@@ -41,13 +42,27 @@ class Fragment1 : Fragment() {
         textViewReceive = view.findViewById(R.id.textViewReceive) // 수신 데이터 표시할 TextView
         textViewLocation = view.findViewById(R.id.textViewLocation) // 위치 정보를 표시할 TextView
         textViewTemperature = view.findViewById(R.id.textViewTemperature) // 온도 표시할 TextView
+        textViewTemperatureCar = view.findViewById(R.id.textViewTemperature_Car) // 온도 표시할 TextView
 
         viewModel = ViewModelProvider(requireActivity()).get(BluetoothViewModel::class.java)
 
-        // ViewModel의 데이터를 관찰
-        viewModel.receivedData.observe(viewLifecycleOwner) { data ->
+        // ViewModel의 데이터 변경을 관찰하여 TextView에 업데이트
+        viewModel.receivedData.observe(viewLifecycleOwner, Observer { data ->
             textViewReceive.text = data
-        }
+        })
+
+        // FusedLocationProviderClient 초기화
+        fusedLocationClient = LocationServices.getFusedLocationProviderClient(requireActivity())
+
+        // 현재 위치와 온도를 가져옴
+        getCurrentLocationAndTemperature()
+        viewModel.heartRate.observe(viewLifecycleOwner, Observer { heartRate ->
+            textViewReceive.text = "BPM: $heartRate"
+        })
+        // ViewModel의 temperature 데이터를 관찰하고 textViewTemperatureCar에 업데이트
+        viewModel.temperature.observe(viewLifecycleOwner, Observer { temperature ->
+            textViewTemperatureCar.text = "$temperature°C"
+        })
 
         return view
     }
@@ -91,9 +106,9 @@ class Fragment1 : Fragment() {
 
                     // 표시할 위치 정보 생성
                     val locationInfo = when {
-                        thoroughfare != null && subLocality != null -> "$subLocality, $city, $thoroughfare, $country"
-                        subLocality != null -> "$subLocality, $city, $country"
-                        city.isNotEmpty() -> "$city, $country"
+                        thoroughfare != null && subLocality != null -> "$country $city $subLocality $thoroughfare"
+                        subLocality != null -> "$country $city $subLocality"
+                        city.isNotEmpty() -> "$country $city"
                         else -> "현재 위치 정보를 가져올 수 없습니다."
                     }
                     textViewLocation.text = locationInfo

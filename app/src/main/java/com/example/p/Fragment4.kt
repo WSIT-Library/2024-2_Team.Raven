@@ -21,7 +21,9 @@ class Fragment4 : Fragment() {
     // Bluetooth 소켓을 Fragment3에서 전달받는 메서드
     fun setBluetoothSocket(socket: BluetoothSocket) {
         this.bluetoothSocket = socket
+        Log.e("Bluetooth", "setBluetoothSocket 호출됨. BluetoothSocket 상태: isInitialized=${::bluetoothSocket.isInitialized}, isConnected=${bluetoothSocket.isConnected}")
     }
+
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -35,6 +37,7 @@ class Fragment4 : Fragment() {
             override fun onProgressChanged(seekBar: SeekBar?, progress: Int, fromUser: Boolean) {
                 // RGB 값을 계산하여 전송
                 val rgbValue = calculateRGBValue(progress)
+                Log.e("Bluetooth", "rgbValue값 데이터 전송")
                 sendRGBValue(rgbValue)
             }
 
@@ -55,13 +58,24 @@ class Fragment4 : Fragment() {
 
     private fun sendRGBValue(rgbValue: String) {
         try {
-            // Bluetooth 소켓을 통해 아두이노로 데이터 전송
+            // Bluetooth 소켓이 초기화되고 연결된 상태인지 확인
             if (::bluetoothSocket.isInitialized && bluetoothSocket.isConnected) {
-                val value = "$rgbValue\n" // 아두이노에서 파싱하기 쉽게 줄바꿈 추가
-                bluetoothSocket.outputStream.write(value.toByteArray())
+                try {
+                    val value = "$rgbValue\n"
+                    bluetoothSocket.outputStream.write(value.toByteArray())
+                    Log.e("Bluetooth", "Bluetooth 소켓을 통해 아두이노로 데이터 전송: $rgbValue")
+                } catch (e: IOException) {
+                    Log.e("Bluetooth", "IOException 발생: ${e.message}")
+                    e.printStackTrace()
+                    Toast.makeText(context, "데이터 전송 중 오류 발생", Toast.LENGTH_SHORT).show()
+                }
+            } else {
+                Log.e("Bluetooth", "Bluetooth 소켓 연결이 되어 있지 않거나, 초기화되지 않음.")
+                Toast.makeText(context, "Bluetooth 소켓이 연결되지 않았습니다.", Toast.LENGTH_SHORT).show()
             }
         } catch (e: IOException) {
             e.printStackTrace()
+            Log.e("Bluetooth", "데이터 전송 중 오류 발생: ${e.message}")
             Toast.makeText(context, "데이터 전송 중 오류 발생", Toast.LENGTH_SHORT).show()
         }
     }
