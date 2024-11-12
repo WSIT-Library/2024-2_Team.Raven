@@ -6,6 +6,7 @@ import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.ImageView
 import android.widget.SeekBar
 import android.widget.TextView
 import android.widget.Toast
@@ -13,11 +14,15 @@ import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModelProvider
 import java.io.IOException
 
+import android.graphics.ColorMatrix
+import android.graphics.ColorMatrixColorFilter
+
 class Fragment4 : Fragment() {
 
     private var bluetoothSocket: BluetoothSocket? = null
     private lateinit var brightnessSeekBar: SeekBar
     private lateinit var textViewbrightnessValueText: TextView
+    private lateinit var lightImage: ImageView // ImageView 추가
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -26,6 +31,7 @@ class Fragment4 : Fragment() {
         val view = inflater.inflate(R.layout.fragment4_layout, container, false)
         brightnessSeekBar = view.findViewById(R.id.brightnessSeekBar)
         textViewbrightnessValueText = view.findViewById(R.id.brightnessValueText)
+        lightImage = view.findViewById(R.id.Light_Image) // ImageView 초기화
 
         // Get the ViewModel and use the shared BluetoothSocket
         val viewModel = ViewModelProvider(requireActivity()).get(BluetoothViewModel::class.java)
@@ -47,10 +53,13 @@ class Fragment4 : Fragment() {
                     val brightnessValue = progress  // RGB 대신 progress 값을 바로 사용
                     sendRGBValue(rgbValue)
 
-                    // RGB 값을 TextView에 표시
-                    textViewbrightnessValueText.text = "밝기 : " + brightnessValue.toString()
+                    // ImageView 색상 필터 적용
+                    updateImageColor(progress)
 
+                    // RGB 값을 TextView에 표시
+                    textViewbrightnessValueText.text = "밝기 : $brightnessValue"
                 }
+
                 override fun onStartTrackingTouch(seekBar: SeekBar?) {}
                 override fun onStopTrackingTouch(seekBar: SeekBar?) {}
             })
@@ -59,6 +68,7 @@ class Fragment4 : Fragment() {
         return view
     }
 
+    // RGB 값 계산
     private fun calculateRGBValue(brightness: Int): String {
         val baseR = 255
         val baseG = 255
@@ -71,6 +81,25 @@ class Fragment4 : Fragment() {
         return "$r,$g,$b"
     }
 
+    // ImageView 색상 필터 업데이트
+    private fun updateImageColor(progress: Int) {
+        val colorMatrix = ColorMatrix()
+
+        // progress가 0이면 흑백, progress가 100이면 원래 이미지 색상
+        if (progress == 0) {
+            // 흑백 변환: 색상 값을 모두 0으로 설정
+            colorMatrix.setSaturation(0f)
+        } else {
+            // progress가 0이 아니면 색상을 점차 복원
+            val saturation = progress / 100f
+            colorMatrix.setSaturation(saturation)
+        }
+
+        val colorFilter = ColorMatrixColorFilter(colorMatrix)
+        lightImage.colorFilter = colorFilter
+    }
+
+    // RGB 값을 아두이노로 전송
     private fun sendRGBValue(rgbValue: String) {
         try {
             if (bluetoothSocket != null && bluetoothSocket!!.isConnected) {

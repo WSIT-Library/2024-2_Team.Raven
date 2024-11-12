@@ -80,7 +80,9 @@
                             android:id="@+id/imageViewGif"
                             android:layout_width="match_parent"
                             android:layout_height="259dp"
-                            app:srcCompat="@drawable/heart" />
+                            app:srcCompat="@drawable/your_gif_file"
+                            android:scaleType="centerCrop"/>
+
 
                     </LinearLayout>
 

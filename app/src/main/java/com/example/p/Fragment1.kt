@@ -24,6 +24,7 @@ import retrofit2.Callback
 import retrofit2.Response
 import java.util.Locale
 
+
 class Fragment1 : Fragment() {
 
     private lateinit var viewModel: BluetoothViewModel

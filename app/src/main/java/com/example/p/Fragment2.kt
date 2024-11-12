@@ -187,11 +187,11 @@ class Fragment2 : Fragment() {
     private fun compareAQIValues() {
         if (airQualityAQI != null && bluetoothAQI != null) {
             val comparisonResult = when {
-                bluetoothAQI!! > airQualityAQI!! -> "현재 차량 공기질의 상태는"
-                bluetoothAQI!! < airQualityAQI!! -> "현재 차량 공기질의 상태는"
-                else -> "현재 차량 공기질의 상태는"
+                bluetoothAQI!! > airQualityAQI!! -> "안 좋은 편이에요."
+                bluetoothAQI!! < airQualityAQI!! -> "좋은 편이에요."
+                else -> "양호한 편이에요."
             }
-            textViewInside.text = comparisonResult
+            textViewOutside.text = comparisonResult
         }
     }
 }

@@ -32,6 +32,8 @@ import java.io.IOException
 import java.io.InputStream
 import java.util.*
 import android.provider.Settings
+import android.widget.ImageView
+import com.bumptech.glide.Glide
 
 class Fragment3 : Fragment() {
 
@@ -49,6 +51,7 @@ class Fragment3 : Fragment() {
     private var workerThread: Thread? = null
     private lateinit var viewModel: BluetoothViewModel // ViewModel 선언
 
+
     @RequiresApi(Build.VERSION_CODES.S)
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -58,6 +61,10 @@ class Fragment3 : Fragment() {
 
         textViewReceive = view.findViewById(R.id.textViewReceive)
         textViewComment = view.findViewById(R.id.textViewComment)
+
+    // GIF용 ImageView 초기화 및 Glide로 로드
+        val imageViewGif: ImageView = view.findViewById(R.id.imageViewGif)
+        Glide.with(this).asGif().load(R.drawable.your_gif_file).into(imageViewGif)
 
         // ViewModel 초기화
         viewModel = ViewModelProvider(requireActivity()).get(BluetoothViewModel::class.java)
