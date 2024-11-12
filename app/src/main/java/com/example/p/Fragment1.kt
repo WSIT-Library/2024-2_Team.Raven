@@ -11,29 +11,40 @@ import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.Button
+import android.widget.ImageView
 import android.widget.TextView
 import android.widget.Toast
 import androidx.core.app.ActivityCompat
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProvider
+import com.bumptech.glide.Glide
 import com.google.android.gms.location.FusedLocationProviderClient
 import com.google.android.gms.location.LocationServices
+import com.pierfrancescosoffritti.androidyoutubeplayer.core.player.YouTubePlayer
+import com.pierfrancescosoffritti.androidyoutubeplayer.core.player.listeners.AbstractYouTubePlayerListener
+import com.pierfrancescosoffritti.androidyoutubeplayer.core.player.views.YouTubePlayerView
 import retrofit2.Call
 import retrofit2.Callback
 import retrofit2.Response
 import java.util.Locale
 
-
 class Fragment1 : Fragment() {
 
     private lateinit var viewModel: BluetoothViewModel
     private lateinit var textViewReceive: TextView
-    private lateinit var textViewLocation: TextView // 위치 정보를 표시할 TextView
-    private lateinit var textViewTemperature: TextView // 온도 표시할 TextView
-    private lateinit var textViewTemperatureCar: TextView // 온도 표시할 TextView
-    private lateinit var AirQualityValue: TextView // 공기질 표시할 TextView
+    private lateinit var textViewLocation: TextView
+    private lateinit var textViewTemperature: TextView
+    private lateinit var textViewTemperatureCar: TextView
+    private lateinit var AirQualityValue: TextView
     private lateinit var fusedLocationClient: FusedLocationProviderClient
+    private lateinit var youTubePlayerView: YouTubePlayerView
+    private lateinit var playButton: Button
+    private lateinit var pauseButton: Button
+    private lateinit var replayButton: Button
+    private var youTubePlayer: YouTubePlayer? = null // nullable로 선언하여 초기화 전 null을 허용
+
     private val apiKey = "9429534b80a3def05a32e862c426f83c" // OpenWeather API 키
 
     override fun onCreateView(
@@ -46,6 +57,58 @@ class Fragment1 : Fragment() {
         textViewTemperature = view.findViewById(R.id.textViewTemperature) // 온도 표시할 TextView
         textViewTemperatureCar = view.findViewById(R.id.textViewTemperature_Car) // 온도 표시할 TextView
         AirQualityValue = view.findViewById(R.id.airQualityValue) // 공기질 표시할 TextView
+
+        youTubePlayerView = view.findViewById(R.id.youtube_player_view)
+        playButton = view.findViewById(R.id.playButton)
+        pauseButton = view.findViewById(R.id.pauseButton)
+        replayButton = view.findViewById(R.id.replayButton)
+
+        val youTubePlayerView = view.findViewById<YouTubePlayerView>(R.id.youtube_player_view)
+
+        lifecycle.addObserver(youTubePlayerView)
+
+        val songTitleTextView = view.findViewById<TextView>(R.id.songTitle)
+        songTitleTextView.isSelected = true // 슬라이드 효과를 위해 텍스트에 포커스를 설정합니다.
+
+        val youtubeapiKey = "AIzaSyCH3y8aM6R7z183txFBk0DkWerLAcCD0sQ"
+        val videoUrl = "https://www.youtube.com/watch?v=R7L2QEm-BUY"
+        val videoId = extractVideoId(videoUrl)
+        val thumbnailUrl = "https://img.youtube.com/vi/$videoId/0.jpg"
+
+        // ImageView에 썸네일 로드
+        val imageView = view.findViewById<ImageView>(R.id.albumCover)
+        Glide.with(this)
+            .load(thumbnailUrl)
+            .into(imageView)
+
+        // YouTube Player 설정
+        youTubePlayerView.addYouTubePlayerListener(object : AbstractYouTubePlayerListener() {
+            override fun onReady(youTubePlayer: YouTubePlayer) {
+                // YouTubePlayer 객체 초기화
+                this@Fragment1.youTubePlayer = youTubePlayer
+                val videoId = "R7L2QEm-BUY" // 예시로 비디오 ID 설정
+                youTubePlayer.loadVideo(videoId, 0f)
+            }
+        })
+
+        // YouTube API로 비디오 정보 가져오기
+        videoId?.let { id ->
+            getVideoDetailsFromYouTube(id, youtubeapiKey)
+        }
+
+        // 버튼 클릭 이벤트 설정
+        playButton.setOnClickListener {
+            youTubePlayer?.play()
+        }
+
+        pauseButton.setOnClickListener {
+            youTubePlayer?.pause()
+        }
+
+        replayButton.setOnClickListener {
+            youTubePlayer?.seekTo(0f)
+            youTubePlayer?.play()
+        }
 
         viewModel = ViewModelProvider(requireActivity()).get(BluetoothViewModel::class.java)
 
@@ -72,8 +135,51 @@ class Fragment1 : Fragment() {
             AirQualityValue.text = "밝기 : $brightness"
         })
 
-
         return view
+    }
+
+    private fun extractVideoId(url: String): String? {
+        val regex = "v=([^&]*)".toRegex()
+        val match = regex.find(url)
+        return match?.groupValues?.get(1)
+    }
+
+    private fun getVideoDetailsFromYouTube(videoId: String, apiKey: String) {
+        val service = RetrofitClient.youtubeApiService
+
+        // 비디오 정보 API 호출
+        service.getVideoDetails("snippet", videoId, apiKey).enqueue(object : Callback<YouTubeResponse> {
+            override fun onResponse(call: Call<YouTubeResponse>, response: Response<YouTubeResponse>) {
+                if (response.isSuccessful) {
+                    val videoDetails = response.body()?.items?.firstOrNull()?.snippet
+                    videoDetails?.let {
+                        // 비디오 제목과 채널 이름 추출
+                        val songTitle = it.title
+                        val artistName = it.channelTitle
+
+                        // 메인 스레드에서 UI 업데이트
+                        activity?.runOnUiThread {
+                            val songTitleTextView = view?.findViewById<TextView>(R.id.songTitle)
+                            val artistNameTextView = view?.findViewById<TextView>(R.id.artistName)
+
+                            // 텍스트뷰에 제목과 아티스트 이름 설정
+                            songTitleTextView?.text = songTitle
+                            artistNameTextView?.text = artistName
+                        }
+                    }
+                } else {
+                    // API 호출 실패 시 처리
+                    Log.e("YouTube API", "Error fetching video details")
+                    Toast.makeText(requireContext(), "Error fetching video details", Toast.LENGTH_SHORT).show()
+                }
+            }
+
+            override fun onFailure(call: Call<YouTubeResponse>, t: Throwable) {
+                // 실패 시 에러 처리
+                Log.e("YouTube API", "Failure: ${t.message}")
+                Toast.makeText(requireContext(), "Failed to load YouTube video details", Toast.LENGTH_SHORT).show()
+            }
+        })
     }
 
     private fun getCurrentLocationAndTemperature() {
@@ -155,7 +261,9 @@ class Fragment1 : Fragment() {
             }
 
             override fun onFailure(call: Call<WeatherResponse>, t: Throwable) {
-                Toast.makeText(requireContext(), "Failed to retrieve temperature: ${t.message}", Toast.LENGTH_SHORT).show()
+                // 네트워크 오류 처리
+                textViewTemperature.text = "온도 데이터를 가져오는 중 오류가 발생했습니다."
+                Toast.makeText(requireContext(), "Network error", Toast.LENGTH_SHORT).show()
             }
         })
     }

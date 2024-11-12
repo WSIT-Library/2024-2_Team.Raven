@@ -5,7 +5,8 @@ import retrofit2.converter.gson.GsonConverterFactory
 
 object RetrofitClient {
     private const val BASE_URL = "https://api.openweathermap.org/"
-    private const val HEART_RATE_BASE_URL = "https://eab0-210-93-86-104.ngrok-free.app/"  // 적절한 URL로 변경
+    private const val HEART_RATE_BASE_URL = "https://cccd-210-93-86-104.ngrok-free.app/"  // 적절한 URL로 변경
+    private const val YOUTUBE_BASE_URL = "https://www.googleapis.com/youtube/v3/"
 
     private val retrofit by lazy {
         Retrofit.Builder()
@@ -17,6 +18,13 @@ object RetrofitClient {
     private val heartRateRetrofit by lazy {
         Retrofit.Builder()
             .baseUrl(HEART_RATE_BASE_URL)
+            .addConverterFactory(GsonConverterFactory.create())
+            .build()
+    }
+
+    private val youtubeRetrofit by lazy {
+        Retrofit.Builder()
+            .baseUrl(YOUTUBE_BASE_URL)
             .addConverterFactory(GsonConverterFactory.create())
             .build()
     }
@@ -35,7 +43,11 @@ object RetrofitClient {
 
     // 심박수 API 서비스
     val heartRateApiService: HeartRateApiService by lazy {
-        retrofit.create(HeartRateApiService::class.java)
+        heartRateRetrofit.create(HeartRateApiService::class.java)
     }
 
+    // YouTube API 서비스
+    val youtubeApiService: YouTubeApiService by lazy {
+        youtubeRetrofit.create(YouTubeApiService::class.java)
+    }
 }
