@@ -13,7 +13,6 @@ import android.widget.Toast
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModelProvider
 import java.io.IOException
-
 import android.graphics.ColorMatrix
 import android.graphics.ColorMatrixColorFilter
 
@@ -23,6 +22,7 @@ class Fragment4 : Fragment() {
     private lateinit var brightnessSeekBar: SeekBar
     private lateinit var textViewbrightnessValueText: TextView
     private lateinit var lightImage: ImageView // ImageView 추가
+    private var currentProgress: Int = 0 // SeekBar의 현재 progress 값을 저장
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -35,7 +35,7 @@ class Fragment4 : Fragment() {
 
         // Get the ViewModel and use the shared BluetoothSocket
         val viewModel = ViewModelProvider(requireActivity()).get(BluetoothViewModel::class.java)
-        brightnessSeekBar.max = 100  // SeekBar 최대값을 100으로 설정
+        brightnessSeekBar.max = 100 // SeekBar 최대값을 100으로 설정
 
         bluetoothSocket = viewModel.bluetoothSocket
 
@@ -44,24 +44,29 @@ class Fragment4 : Fragment() {
         } else {
             brightnessSeekBar.setOnSeekBarChangeListener(object : SeekBar.OnSeekBarChangeListener {
                 override fun onProgressChanged(seekBar: SeekBar?, progress: Int, fromUser: Boolean) {
-                    // progress 값을 ViewModel에 저장
+                    // progress 값을 임시로 저장
+                    currentProgress = progress
                     viewModel.setBrightnessValue(progress)
 
                     // brightness 값을 TextView에 표시
                     textViewbrightnessValueText.text = progress.toString()
-                    val rgbValue = calculateRGBValue(progress)
-                    val brightnessValue = progress  // RGB 대신 progress 값을 바로 사용
-                    sendRGBValue(rgbValue)
 
                     // ImageView 색상 필터 적용
                     updateImageColor(progress)
 
                     // RGB 값을 TextView에 표시
-                    textViewbrightnessValueText.text = "밝기 : $brightnessValue"
+                    textViewbrightnessValueText.text = "밝기 : $progress"
                 }
 
-                override fun onStartTrackingTouch(seekBar: SeekBar?) {}
-                override fun onStopTrackingTouch(seekBar: SeekBar?) {}
+                override fun onStartTrackingTouch(seekBar: SeekBar?) {
+                    // Do nothing
+                }
+
+                override fun onStopTrackingTouch(seekBar: SeekBar?) {
+                    // SeekBar가 멈췄을 때만 데이터를 전송
+                    val rgbValue = calculateRGBValue(currentProgress)
+                    sendRGBValue(rgbValue)
+                }
             })
         }
 
