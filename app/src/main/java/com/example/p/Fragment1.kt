@@ -13,6 +13,7 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.Button
 import android.widget.ImageView
+import android.widget.SeekBar
 import android.widget.TextView
 import android.widget.Toast
 import androidx.core.app.ActivityCompat
@@ -22,6 +23,7 @@ import androidx.lifecycle.ViewModelProvider
 import com.bumptech.glide.Glide
 import com.google.android.gms.location.FusedLocationProviderClient
 import com.google.android.gms.location.LocationServices
+import com.pierfrancescosoffritti.androidyoutubeplayer.core.player.PlayerConstants
 import com.pierfrancescosoffritti.androidyoutubeplayer.core.player.YouTubePlayer
 import com.pierfrancescosoffritti.androidyoutubeplayer.core.player.listeners.AbstractYouTubePlayerListener
 import com.pierfrancescosoffritti.androidyoutubeplayer.core.player.views.YouTubePlayerView
@@ -43,6 +45,10 @@ class Fragment1 : Fragment() {
     private lateinit var playButton: Button
     private lateinit var pauseButton: Button
     private lateinit var replayButton: Button
+
+    private lateinit var seekBar: SeekBar
+    private lateinit var currentTimeTextView: TextView
+    private lateinit var totalTimeTextView: TextView
     private var youTubePlayer: YouTubePlayer? = null // nullable로 선언하여 초기화 전 null을 허용
 
     private val apiKey = "9429534b80a3def05a32e862c426f83c" // OpenWeather API 키
@@ -63,8 +69,12 @@ class Fragment1 : Fragment() {
         pauseButton = view.findViewById(R.id.pauseButton)
         replayButton = view.findViewById(R.id.replayButton)
 
-        val youTubePlayerView = view.findViewById<YouTubePlayerView>(R.id.youtube_player_view)
+        // SeekBar와 TextView 초기화
+        seekBar = view.findViewById(R.id.seekBar)
+        currentTimeTextView = view.findViewById(R.id.currentTime)
+        totalTimeTextView = view.findViewById(R.id.totalTime)
 
+        val youTubePlayerView = view.findViewById<YouTubePlayerView>(R.id.youtube_player_view)
         lifecycle.addObserver(youTubePlayerView)
 
         val songTitleTextView = view.findViewById<TextView>(R.id.songTitle)
@@ -80,14 +90,42 @@ class Fragment1 : Fragment() {
         Glide.with(this)
             .load(thumbnailUrl)
             .into(imageView)
-
-        // YouTube Player 설정
         youTubePlayerView.addYouTubePlayerListener(object : AbstractYouTubePlayerListener() {
             override fun onReady(youTubePlayer: YouTubePlayer) {
+                super.onReady(youTubePlayer)
                 // YouTubePlayer 객체 초기화
                 this@Fragment1.youTubePlayer = youTubePlayer
-                val videoId = "R7L2QEm-BUY" // 예시로 비디오 ID 설정
-                youTubePlayer.loadVideo(videoId, 0f)
+                // 자동으로 비디오를 재생하지 않도록 주석 처리
+                // val videoId = "R7L2QEm-BUY" // 예시로 비디오 ID 설정
+                // youTubePlayer.loadVideo(videoId, 0f)
+
+                // 비디오가 로드된 후 총 시간을 가져오기
+                youTubePlayer.addListener(object : AbstractYouTubePlayerListener() {
+                    override fun onVideoDuration(youTubePlayer: YouTubePlayer, duration: Float) {
+                        super.onVideoDuration(youTubePlayer, duration)
+
+                        // 비디오의 총 시간을 가져옴
+                        val totalMinutes = (duration / 60).toInt()  // 분
+                        val totalSeconds = (duration % 60).toInt() // 초
+                        totalTimeTextView.text = String.format("%02d:%02d", totalMinutes, totalSeconds)
+
+                        // SeekBar의 최대값을 비디오 총 시간으로 설정
+                        seekBar.max = duration.toInt()
+                    }
+
+                    override fun onCurrentSecond(youTubePlayer: YouTubePlayer, second: Float) {
+                        super.onCurrentSecond(youTubePlayer, second)
+
+                        val currentMinutes = (second / 60).toInt() // 분
+                        val currentSeconds = (second % 60).toInt() // 초
+                        currentTimeTextView.text = String.format("%02d:%02d", currentMinutes, currentSeconds)
+
+                        // SeekBar의 진행 상황 업데이트 (비디오 진행에 맞춰 업데이트)
+                        seekBar.progress = second.toInt()
+                    }
+                })
+
+
             }
         })
 
@@ -96,9 +134,9 @@ class Fragment1 : Fragment() {
             getVideoDetailsFromYouTube(id, youtubeapiKey)
         }
 
-        // 버튼 클릭 이벤트 설정
         playButton.setOnClickListener {
-            youTubePlayer?.play()
+            youTubePlayer?.loadVideo("R7L2QEm-BUY", 0f) // 비디오 ID와 시작 시간을 설정
+            youTubePlayer?.play() // 비디오 재생
         }
 
         pauseButton.setOnClickListener {
@@ -135,13 +173,62 @@ class Fragment1 : Fragment() {
             AirQualityValue.text = "밝기 : $brightness"
         })
 
+        // 서버에서 유튜브 URL을 받아오는 로직 (예시)
+        val serverYouTubeUrl = "https://www.youtube.com/watch?v=R7L2QEm-BUY" // 서버에서 받아온 URL
+        handleYouTubeUrlFromServer(serverYouTubeUrl) // 서버 URL 처리
         return view
     }
+
+    // 서버에서 받은 유튜브 URL을 받아서 비디오 ID를 추출하고 재생하는 메서드
+    fun handleYouTubeUrlFromServer(videoUrl: String) {
+        val videoId = extractVideoId(videoUrl)
+        videoId?.let { id ->
+            youTubePlayer?.loadVideo(id, 0f) // 비디오 ID를 로드하여 재생
+        }
+    }
+    // 서버에서 유튜브 URL을 받아오는 메소드
+    private fun fetchYouTubeUrl() {
+        RetrofitClient.youtubeApiService.getVideoUrl().enqueue(object : Callback<YouTubeUrlResponse> {
+            override fun onResponse(
+                call: Call<YouTubeUrlResponse>,
+                response: Response<YouTubeUrlResponse>
+            ) {
+                if (response.isSuccessful) {
+                    val videoUrl = response.body()?.videoUrl
+                    videoUrl?.let {
+                        // URL을 파싱하여 videoId를 추출
+                        val videoId = extractVideoId(it)
+                        videoId?.let { id ->
+                            setupYouTubePlayer(id)  // 추출한 videoId로 YouTube Player 설정
+                        }
+                    }
+                } else {
+                    Log.e("Fragment1", "Failed to fetch YouTube URL")
+                }
+            }
+
+            override fun onFailure(call: Call<YouTubeUrlResponse>, t: Throwable) {
+                Log.e("Fragment1", "Error: ${t.message}")
+            }
+        })
+    }
+
 
     private fun extractVideoId(url: String): String? {
         val regex = "v=([^&]*)".toRegex()
         val match = regex.find(url)
         return match?.groupValues?.get(1)
+    }
+
+    // YouTubePlayer를 설정하는 함수
+    private fun setupYouTubePlayer(videoId: String) {
+        youTubePlayerView.addYouTubePlayerListener(object : AbstractYouTubePlayerListener() {
+            override fun onReady(youTubePlayer: YouTubePlayer) {
+                super.onReady(youTubePlayer)
+                this@Fragment1.youTubePlayer = youTubePlayer
+                youTubePlayer.loadVideo(videoId, 0f) // 비디오 ID와 시작 시간을 설정
+            }
+        })
     }
 
     private fun getVideoDetailsFromYouTube(videoId: String, apiKey: String) {
@@ -181,6 +268,7 @@ class Fragment1 : Fragment() {
             }
         })
     }
+
 
     private fun getCurrentLocationAndTemperature() {
         if (ActivityCompat.checkSelfPermission(
