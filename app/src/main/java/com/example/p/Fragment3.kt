@@ -144,7 +144,7 @@ class Fragment3 : Fragment() {
             Toast.makeText(context, "HC-06에 연결되었습니다.", Toast.LENGTH_SHORT).show()
             // Save the socket in the ViewModel
             viewModel.bluetoothSocket = bluetoothSocket
-
+            viewModel.setBluetoothConnected(true) // 연결 상태 업데이트
             // Start reading data
             readDataFromBluetooth()
 
@@ -155,6 +155,7 @@ class Fragment3 : Fragment() {
         } catch (e: Exception) {
             Log.e("Bluetooth", "연결 실패: ${e.message}")
           //  dismissConnectingDialog()  // 연결 성공 시 팝업창 닫기
+            viewModel.setBluetoothConnected(false) // 연결 실패 시 업데이트
             Toast.makeText(context, "연결에 실패했습니다.", Toast.LENGTH_SHORT).show()
         }
     }
@@ -199,6 +200,7 @@ class Fragment3 : Fragment() {
 
                                     // 모든 센서 데이터를 서버로 전송
                                     sendDataToServer(heartRate, CO, Alcohol, CO2, Tolueno, NH4, Acetona, temperature, humidity)
+
 
                                     // 심박수 표시
                                     handler.post {
@@ -255,7 +257,6 @@ class Fragment3 : Fragment() {
                     Toast.makeText(context, "서버 응답 오류: ${response.code()}", Toast.LENGTH_SHORT).show()
                 }
             }
-
             override fun onFailure(call: Call<ServerResponse>, t: Throwable) {
                 Toast.makeText(context, "서버 전송 실패: ${t.message}", Toast.LENGTH_SHORT).show()
             }

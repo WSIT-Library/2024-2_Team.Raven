@@ -9,6 +9,11 @@ class BluetoothViewModel : ViewModel() {
     private val _receivedData = MutableLiveData<String>()
     val receivedData: LiveData<String> get() = _receivedData
 
+    val isBluetoothConnected = MutableLiveData<Boolean>(false)
+    fun setBluetoothConnected(connected: Boolean) {
+        isBluetoothConnected.value = connected
+    }
+
     private val _heartRate = MutableLiveData<String>()
     val heartRate: LiveData<String> get() = _heartRate
 

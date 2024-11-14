@@ -93,6 +93,12 @@ class Fragment1 : Fragment() {
         val videoId = extractVideoId(videoUrl)
         val thumbnailUrl = "https://img.youtube.com/vi/$videoId/0.jpg"
 
+        viewModel = ViewModelProvider(requireActivity()).get(BluetoothViewModel::class.java)
+
+        viewModel.isBluetoothConnected.observe(viewLifecycleOwner) { isConnected ->
+            playButton.isEnabled = isConnected // 연결 상태에 따라 버튼 활성화
+        }
+
         // ImageView에 썸네일 로드
         val imageView = view.findViewById<ImageView>(R.id.albumCover)
         Glide.with(this)
@@ -135,9 +141,6 @@ class Fragment1 : Fragment() {
                     }
                 })
 
-
-                // 서버에서 URL 받아오는 메서드 호출
-                fetchYouTubeUrlFromServer()
             }
         })
 
@@ -165,7 +168,11 @@ class Fragment1 : Fragment() {
 
         // 서버에서 유튜브 URL을 받아오고 해당 URL로 비디오를 재생
         playButton.setOnClickListener {
-            youTubePlayer?.play()
+            if (viewModel.isBluetoothConnected.value == true) {
+                fetchYouTubeUrlFromServer()
+            } else {
+                Toast.makeText(requireContext(), "블루투스 연결 후 시도해주세요.", Toast.LENGTH_SHORT).show()
+            }
         }
 
         pauseButton.setOnClickListener {

@@ -42,10 +42,6 @@ object RetrofitClient {
         retrofit.create(SensorApiService::class.java)
     }
 
-    // 심박수 API 서비스
-    val heartRateApiService: HeartRateApiService by lazy {
-        heartRateRetrofit.create(HeartRateApiService::class.java)
-    }
 
     // YouTube API 서비스
     val youtubeApiService: YouTubeApiService by lazy {
