@@ -5,7 +5,8 @@ import retrofit2.converter.gson.GsonConverterFactory
 
 object RetrofitClient {
     private const val BASE_URL = "https://api.openweathermap.org/"
-    private const val HEART_RATE_BASE_URL = "https://cccd-210-93-86-104.ngrok-free.app/"  // 적절한 URL로 변경
+    private const val HEART_RATE_BASE_URL = "https://124d-210-93-86-104.ngrok-free.app/"  // 적절한 URL로 변경
+   // private const val YOUTUBE_BASE_URL = "https://ca7d-210-93-86-104.ngrok-free.app/"
     private const val YOUTUBE_BASE_URL = "https://www.googleapis.com/youtube/v3/"
 
     private val retrofit by lazy {

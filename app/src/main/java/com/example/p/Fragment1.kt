@@ -21,19 +21,28 @@ import androidx.fragment.app.Fragment
 import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProvider
 import com.bumptech.glide.Glide
+import com.example.p.RetrofitClient.youtubeApiService
 import com.google.android.gms.location.FusedLocationProviderClient
 import com.google.android.gms.location.LocationServices
+import com.google.firebase.inject.Provider
 import com.pierfrancescosoffritti.androidyoutubeplayer.core.player.PlayerConstants
 import com.pierfrancescosoffritti.androidyoutubeplayer.core.player.YouTubePlayer
 import com.pierfrancescosoffritti.androidyoutubeplayer.core.player.listeners.AbstractYouTubePlayerListener
 import com.pierfrancescosoffritti.androidyoutubeplayer.core.player.views.YouTubePlayerView
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
+import org.json.JSONObject
 import retrofit2.Call
 import retrofit2.Callback
 import retrofit2.Response
+import java.net.URL
 import java.util.Locale
 
 class Fragment1 : Fragment() {
-
+    private var isUserSeeking = false
     private lateinit var viewModel: BluetoothViewModel
     private lateinit var textViewReceive: TextView
     private lateinit var textViewLocation: TextView
@@ -68,7 +77,6 @@ class Fragment1 : Fragment() {
         playButton = view.findViewById(R.id.playButton)
         pauseButton = view.findViewById(R.id.pauseButton)
         replayButton = view.findViewById(R.id.replayButton)
-
         // SeekBar와 TextView 초기화
         seekBar = view.findViewById(R.id.seekBar)
         currentTimeTextView = view.findViewById(R.id.currentTime)
@@ -90,14 +98,13 @@ class Fragment1 : Fragment() {
         Glide.with(this)
             .load(thumbnailUrl)
             .into(imageView)
+
+        // YouTube Player 설정
         youTubePlayerView.addYouTubePlayerListener(object : AbstractYouTubePlayerListener() {
             override fun onReady(youTubePlayer: YouTubePlayer) {
                 super.onReady(youTubePlayer)
                 // YouTubePlayer 객체 초기화
                 this@Fragment1.youTubePlayer = youTubePlayer
-                // 자동으로 비디오를 재생하지 않도록 주석 처리
-                // val videoId = "R7L2QEm-BUY" // 예시로 비디오 ID 설정
-                // youTubePlayer.loadVideo(videoId, 0f)
 
                 // 비디오가 로드된 후 총 시간을 가져오기
                 youTubePlayer.addListener(object : AbstractYouTubePlayerListener() {
@@ -121,22 +128,44 @@ class Fragment1 : Fragment() {
                         currentTimeTextView.text = String.format("%02d:%02d", currentMinutes, currentSeconds)
 
                         // SeekBar의 진행 상황 업데이트 (비디오 진행에 맞춰 업데이트)
-                        seekBar.progress = second.toInt()
+                        // 이 부분은 사용자 입력에 의한 SeekBar 변경 시 자동 업데이트를 방지
+                        if (!isUserSeeking) {
+                            seekBar.progress = second.toInt()
+                        }
                     }
                 })
 
 
+                // 서버에서 URL 받아오는 메서드 호출
+                fetchYouTubeUrlFromServer()
             }
         })
 
-        // YouTube API로 비디오 정보 가져오기
-        videoId?.let { id ->
-            getVideoDetailsFromYouTube(id, youtubeapiKey)
-        }
+        seekBar.setOnSeekBarChangeListener(object : SeekBar.OnSeekBarChangeListener {
+            override fun onProgressChanged(seekBar: SeekBar?, progress: Int, fromUser: Boolean) {
+                if (fromUser) {
+                    // 사용자 입력으로 값을 변경하면 isUserSeeking 플래그를 true로 설정
+                    isUserSeeking = true
+                    // 비디오 재생 위치를 SeekBar의 값에 맞게 변경
+                    youTubePlayer?.seekTo(progress.toFloat())
+                }
+            }
 
+            override fun onStartTrackingTouch(seekBar: SeekBar?) {
+                // SeekBar 터치 시작 시 플래그를 true로 설정
+                isUserSeeking = true
+            }
+
+            override fun onStopTrackingTouch(seekBar: SeekBar?) {
+                // SeekBar 터치 종료 시 플래그를 false로 설정
+                isUserSeeking = false
+            }
+        })
+
+
+        // 서버에서 유튜브 URL을 받아오고 해당 URL로 비디오를 재생
         playButton.setOnClickListener {
-            youTubePlayer?.loadVideo("R7L2QEm-BUY", 0f) // 비디오 ID와 시작 시간을 설정
-            youTubePlayer?.play() // 비디오 재생
+            youTubePlayer?.play()
         }
 
         pauseButton.setOnClickListener {
@@ -147,6 +176,7 @@ class Fragment1 : Fragment() {
             youTubePlayer?.seekTo(0f)
             youTubePlayer?.play()
         }
+
 
         viewModel = ViewModelProvider(requireActivity()).get(BluetoothViewModel::class.java)
 
@@ -172,65 +202,47 @@ class Fragment1 : Fragment() {
             // progress 값을 AirQualityValue에 표시
             AirQualityValue.text = "밝기 : $brightness"
         })
-
-        // 서버에서 유튜브 URL을 받아오는 로직 (예시)
-        val serverYouTubeUrl = "https://www.youtube.com/watch?v=R7L2QEm-BUY" // 서버에서 받아온 URL
-        handleYouTubeUrlFromServer(serverYouTubeUrl) // 서버 URL 처리
         return view
+    }
+
+    // 서버에서 유튜브 URL을 받아와서 비디오를 로드하는 메서드
+    private fun fetchYouTubeUrlFromServer() {
+        GlobalScope.launch(Dispatchers.Main) {
+            try {
+                val response = youtubeApiService.getYouTubeUrl()
+                if (response.isSuccessful) {
+                    Toast.makeText(requireContext(), "Youtube to server 연결 성공", Toast.LENGTH_SHORT).show()
+                    val responseBody = response.body()
+                    Log.e("youtube Response", responseBody.toString())  // 서버 응답 본문 로그
+                    val videoUrl = responseBody?.url
+                   // val videoUrl = "https://www.youtube.com/watch?v=Y8YCGVDCpNY"
+                    Log.e("youtube URL", "URL:" + videoUrl.toString())
+                    videoUrl?.let {
+                        handleYouTubeUrlFromServer(it)
+                    }
+                } else {
+                    Toast.makeText(requireContext(), "Failed to fetch URL", Toast.LENGTH_SHORT).show()
+                    Log.e("YouTube API", "Response not successful: ${response.code()}")
+                }
+            } catch (e: Exception) {
+                e.printStackTrace() // 예외의 상세한 스택 트레이스를 로그에 출력
+                Log.e("YouTube API", "Error fetching URL: ${e.message}")
+                Toast.makeText(requireContext(), "Error fetching URL", Toast.LENGTH_SHORT).show()
+            }
+        }
     }
 
     // 서버에서 받은 유튜브 URL을 받아서 비디오 ID를 추출하고 재생하는 메서드
     fun handleYouTubeUrlFromServer(videoUrl: String) {
+        Log.e("handleYouTubeUrlFromServer", "handleYouTubeUrlFromServer 연결 성공")
         val videoId = extractVideoId(videoUrl)
         videoId?.let { id ->
+            getVideoDetailsFromYouTube(id, "AIzaSyCH3y8aM6R7z183txFBk0DkWerLAcCD0sQ")
             youTubePlayer?.loadVideo(id, 0f) // 비디오 ID를 로드하여 재생
         }
     }
-    // 서버에서 유튜브 URL을 받아오는 메소드
-    private fun fetchYouTubeUrl() {
-        RetrofitClient.youtubeApiService.getVideoUrl().enqueue(object : Callback<YouTubeUrlResponse> {
-            override fun onResponse(
-                call: Call<YouTubeUrlResponse>,
-                response: Response<YouTubeUrlResponse>
-            ) {
-                if (response.isSuccessful) {
-                    val videoUrl = response.body()?.videoUrl
-                    videoUrl?.let {
-                        // URL을 파싱하여 videoId를 추출
-                        val videoId = extractVideoId(it)
-                        videoId?.let { id ->
-                            setupYouTubePlayer(id)  // 추출한 videoId로 YouTube Player 설정
-                        }
-                    }
-                } else {
-                    Log.e("Fragment1", "Failed to fetch YouTube URL")
-                }
-            }
 
-            override fun onFailure(call: Call<YouTubeUrlResponse>, t: Throwable) {
-                Log.e("Fragment1", "Error: ${t.message}")
-            }
-        })
-    }
-
-
-    private fun extractVideoId(url: String): String? {
-        val regex = "v=([^&]*)".toRegex()
-        val match = regex.find(url)
-        return match?.groupValues?.get(1)
-    }
-
-    // YouTubePlayer를 설정하는 함수
-    private fun setupYouTubePlayer(videoId: String) {
-        youTubePlayerView.addYouTubePlayerListener(object : AbstractYouTubePlayerListener() {
-            override fun onReady(youTubePlayer: YouTubePlayer) {
-                super.onReady(youTubePlayer)
-                this@Fragment1.youTubePlayer = youTubePlayer
-                youTubePlayer.loadVideo(videoId, 0f) // 비디오 ID와 시작 시간을 설정
-            }
-        })
-    }
-
+    // YouTube API로 비디오 정보 가져오기
     private fun getVideoDetailsFromYouTube(videoId: String, apiKey: String) {
         val service = RetrofitClient.youtubeApiService
 
@@ -244,14 +256,28 @@ class Fragment1 : Fragment() {
                         val songTitle = it.title
                         val artistName = it.channelTitle
 
+                        // 썸네일 URL 추출
+                        val thumbnailUrl = it.thumbnails?.high?.url // high 품질 썸네일 URL
+
                         // 메인 스레드에서 UI 업데이트
                         activity?.runOnUiThread {
                             val songTitleTextView = view?.findViewById<TextView>(R.id.songTitle)
                             val artistNameTextView = view?.findViewById<TextView>(R.id.artistName)
+                            val thumbnails = view?.findViewById<ImageView>(R.id.albumCover)
 
                             // 텍스트뷰에 제목과 아티스트 이름 설정
                             songTitleTextView?.text = songTitle
                             artistNameTextView?.text = artistName
+
+                            // 썸네일 이미지 로드 (Glide 사용)
+                            if (!thumbnailUrl.isNullOrEmpty()) {
+                                if (thumbnails != null) {
+                                    Glide.with(requireContext())
+                                        .load(thumbnailUrl) // String 타입의 URL을 Glide에 전달
+                                        .into(thumbnails)
+                                } // ImageView에 썸네일 로드
+                            }
+
                         }
                     }
                 } else {
@@ -269,7 +295,13 @@ class Fragment1 : Fragment() {
         })
     }
 
-
+    // 비디오 ID 추출
+    private fun extractVideoId(url: String): String? {
+        val regex = "v=([^&]*)".toRegex()
+        val match = regex.find(url)
+        return match?.groupValues?.get(1)
+    }
+    //주변 공기질 및 온습도 가져오는 코드
     private fun getCurrentLocationAndTemperature() {
         if (ActivityCompat.checkSelfPermission(
                 requireContext(),

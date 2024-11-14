@@ -76,6 +76,7 @@ dependencies {
     implementation(libs.androidx.viewpager2.v100)
     implementation(libs.androidx.appcompat)
     implementation(libs.play.services.location)
+    implementation(libs.firebase.components)
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)

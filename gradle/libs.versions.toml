@@ -18,6 +18,7 @@ viewpager2 = "1.1.0"
 appcompat = "1.7.0"
 viewpager2Version = "1.0.0"
 playServicesLocation = "21.3.0"
+firebaseComponents = "18.0.1"
 
 [libraries]
 androidx-appcompat-v161 = { module = "androidx.appcompat:appcompat", version.ref = "appcompatVersion" }
@@ -44,6 +45,7 @@ androidx-appcompat = { group = "androidx.appcompat", name = "appcompat", version
 logging-interceptor = { module = "com.squareup.okhttp3:logging-interceptor", version.ref = "loggingInterceptor" }
 retrofit = { module = "com.squareup.retrofit2:retrofit", version.ref = "retrofit" }
 play-services-location = { group = "com.google.android.gms", name = "play-services-location", version.ref = "playServicesLocation" }
+firebase-components = { group = "com.google.firebase", name = "firebase-components", version.ref = "firebaseComponents" }
 
 [plugins]
 android-application = { id = "com.android.application", version.ref = "agp" }
