@@ -216,6 +216,7 @@ class Fragment1 : Fragment() {
                     Log.e("youtube Response", responseBody.toString())  // 서버 응답 본문 로그
                     val videoUrl = responseBody?.url
                    // val videoUrl = "https://www.youtube.com/watch?v=Y8YCGVDCpNY"
+
                     Log.e("youtube URL", "URL:" + videoUrl.toString())
                     videoUrl?.let {
                         handleYouTubeUrlFromServer(it)
@@ -236,6 +237,7 @@ class Fragment1 : Fragment() {
     fun handleYouTubeUrlFromServer(videoUrl: String) {
         Log.e("handleYouTubeUrlFromServer", "handleYouTubeUrlFromServer 연결 성공")
         val videoId = extractVideoId(videoUrl)
+        Log.e("YouTube ID", videoId.toString())  // 추출된 비디오 ID 로그
         videoId?.let { id ->
             getVideoDetailsFromYouTube(id, "AIzaSyCH3y8aM6R7z183txFBk0DkWerLAcCD0sQ")
             youTubePlayer?.loadVideo(id, 0f) // 비디오 ID를 로드하여 재생
