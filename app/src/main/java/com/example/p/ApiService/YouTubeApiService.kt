@@ -1,9 +1,10 @@
-package com.example.p
+package com.example.p.ApiService
 
+import com.example.p.Response.YouTubeResponse
+import com.example.p.Response.YouTubeUrlResponse
 import retrofit2.Call
 import retrofit2.Response
 import retrofit2.http.GET
-import retrofit2.http.POST
 import retrofit2.http.Query
 
 /*

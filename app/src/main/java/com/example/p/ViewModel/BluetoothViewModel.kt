@@ -1,4 +1,4 @@
-package com.example.p
+package com.example.p.ViewModel
 
 import android.bluetooth.BluetoothSocket
 import androidx.lifecycle.LiveData
@@ -17,11 +17,12 @@ class BluetoothViewModel : ViewModel() {
     private val _heartRate = MutableLiveData<String>()
     val heartRate: LiveData<String> get() = _heartRate
 
-    var bluetoothSocket: BluetoothSocket? = null
-
-    fun setHeartRate(value: String) {
-        _heartRate.value = value
+    // 심박수 값을 업데이트하는 메서드
+    fun setHeartRate(heartRate: String) {
+        _heartRate.value = heartRate
     }
+
+    var bluetoothSocket: BluetoothSocket? = null
 
     fun setReceivedData(value: String) {
         _receivedData.value = value

@@ -1,4 +1,4 @@
-package com.example.p
+package com.example.p.Fragments
 
 import android.bluetooth.BluetoothSocket
 import android.os.Bundle
@@ -15,6 +15,8 @@ import androidx.lifecycle.ViewModelProvider
 import java.io.IOException
 import android.graphics.ColorMatrix
 import android.graphics.ColorMatrixColorFilter
+import com.example.p.ViewModel.BluetoothViewModel
+import com.example.p.R
 
 class Fragment4 : Fragment() {
 

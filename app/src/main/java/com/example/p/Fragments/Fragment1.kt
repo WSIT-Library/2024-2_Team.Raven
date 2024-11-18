@@ -1,12 +1,20 @@
-package com.example.p
+package com.example.p.Fragments
+import SensorData
 
-import WeatherResponse
+import com.example.p.Response.WeatherResponse
 import android.Manifest
+import android.bluetooth.BluetoothAdapter
+import android.bluetooth.BluetoothDevice
+import android.bluetooth.BluetoothSocket
 import android.content.pm.PackageManager
 import android.location.Address
 import android.location.Geocoder
 import android.location.Location
+import android.os.Build
 import android.os.Bundle
+import android.os.Handler
+import android.os.Looper
+import android.provider.Settings
 import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
@@ -16,35 +24,51 @@ import android.widget.ImageView
 import android.widget.SeekBar
 import android.widget.TextView
 import android.widget.Toast
+import androidx.activity.result.ActivityResultLauncher
+import androidx.activity.result.contract.ActivityResultContracts
+import androidx.annotation.RequiresApi
 import androidx.core.app.ActivityCompat
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProvider
 import com.bumptech.glide.Glide
+import com.example.p.ViewModel.BluetoothViewModel
+import com.example.p.R
+import com.example.p.RetrofitClient
 import com.example.p.RetrofitClient.youtubeApiService
+import com.example.p.Response.ServerResponse
+import com.example.p.Response.YouTubeResponse
 import com.google.android.gms.location.FusedLocationProviderClient
 import com.google.android.gms.location.LocationServices
-import com.google.firebase.inject.Provider
-import com.pierfrancescosoffritti.androidyoutubeplayer.core.player.PlayerConstants
 import com.pierfrancescosoffritti.androidyoutubeplayer.core.player.YouTubePlayer
-import com.pierfrancescosoffritti.androidyoutubeplayer.core.player.listeners.AbstractYouTubePlayerListener
 import com.pierfrancescosoffritti.androidyoutubeplayer.core.player.views.YouTubePlayerView
-import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.withContext
-import org.json.JSONObject
 import retrofit2.Call
 import retrofit2.Callback
 import retrofit2.Response
-import java.net.URL
+import java.io.IOException
+import java.io.InputStream
 import java.util.Locale
+import java.util.UUID
 
 class Fragment1 : Fragment() {
-    private var isUserSeeking = false
-    private lateinit var viewModel: BluetoothViewModel
+
+    private val HC06_MAC_ADDRESS = "98:D3:91:FD:F6:02"  // HC-06의 MAC 주소
+    private val UUID_HC06: UUID = UUID.fromString("00001101-0000-1000-8000-00805F9B34FB")
+    private lateinit var bluetoothAdapter: BluetoothAdapter
+    private var bluetoothSocket: BluetoothSocket? = null
     private lateinit var textViewReceive: TextView
+    private lateinit var textViewComment: TextView
+    private lateinit var requestBluetoothPermissionLauncher: ActivityResultLauncher<Array<String>>
+    private lateinit var readBuffer: ByteArray  // 버퍼 선언
+    private var readBufferPosition: Int = 0  // 버퍼 위치 초기화
+    private var workerThread: Thread? = null
+    private lateinit var viewModel: BluetoothViewModel // ViewModel 선언
+    private lateinit var bluetoothViewModel: BluetoothViewModel
+
+    private var isUserSeeking = false
     private lateinit var textViewLocation: TextView
     private lateinit var textViewTemperature: TextView
     private lateinit var textViewTemperatureCar: TextView
@@ -62,6 +86,7 @@ class Fragment1 : Fragment() {
 
     private val apiKey = "9429534b80a3def05a32e862c426f83c" // OpenWeather API 키
 
+    @RequiresApi(Build.VERSION_CODES.S)
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
@@ -95,54 +120,37 @@ class Fragment1 : Fragment() {
 
         viewModel = ViewModelProvider(requireActivity()).get(BluetoothViewModel::class.java)
 
-        viewModel.isBluetoothConnected.observe(viewLifecycleOwner) { isConnected ->
-            playButton.isEnabled = isConnected // 연결 상태에 따라 버튼 활성화
-        }
-
         // ImageView에 썸네일 로드
         val imageView = view.findViewById<ImageView>(R.id.albumCover)
         Glide.with(this)
             .load(thumbnailUrl)
             .into(imageView)
+        // ViewModel 초기화
+        viewModel = ViewModelProvider(requireActivity()).get(BluetoothViewModel::class.java)
 
-        // YouTube Player 설정
-        youTubePlayerView.addYouTubePlayerListener(object : AbstractYouTubePlayerListener() {
-            override fun onReady(youTubePlayer: YouTubePlayer) {
-                super.onReady(youTubePlayer)
-                // YouTubePlayer 객체 초기화
-                this@Fragment1.youTubePlayer = youTubePlayer
+        // 블루투스 어댑터 초기화
+        bluetoothAdapter = BluetoothAdapter.getDefaultAdapter()
+        if (bluetoothAdapter == null) {
+            Toast.makeText(context, "블루투스를 지원하지 않는 기기입니다.", Toast.LENGTH_LONG).show()
+            activity?.finish()
+            return view
+        }
+        // 권한 요청 런처 설정
+        requestBluetoothPermissionLauncher = registerForActivityResult(
+            ActivityResultContracts.RequestMultiplePermissions()
+        ) { permissions ->
+            val isBluetoothConnectGranted = permissions[Manifest.permission.BLUETOOTH_CONNECT] ?: false
+            val isBluetoothScanGranted = permissions[Manifest.permission.BLUETOOTH_SCAN] ?: false
 
-                // 비디오가 로드된 후 총 시간을 가져오기
-                youTubePlayer.addListener(object : AbstractYouTubePlayerListener() {
-                    override fun onVideoDuration(youTubePlayer: YouTubePlayer, duration: Float) {
-                        super.onVideoDuration(youTubePlayer, duration)
-
-                        // 비디오의 총 시간을 가져옴
-                        val totalMinutes = (duration / 60).toInt()  // 분
-                        val totalSeconds = (duration % 60).toInt() // 초
-                        totalTimeTextView.text = String.format("%02d:%02d", totalMinutes, totalSeconds)
-
-                        // SeekBar의 최대값을 비디오 총 시간으로 설정
-                        seekBar.max = duration.toInt()
-                    }
-
-                    override fun onCurrentSecond(youTubePlayer: YouTubePlayer, second: Float) {
-                        super.onCurrentSecond(youTubePlayer, second)
-
-                        val currentMinutes = (second / 60).toInt() // 분
-                        val currentSeconds = (second % 60).toInt() // 초
-                        currentTimeTextView.text = String.format("%02d:%02d", currentMinutes, currentSeconds)
-
-                        // SeekBar의 진행 상황 업데이트 (비디오 진행에 맞춰 업데이트)
-                        // 이 부분은 사용자 입력에 의한 SeekBar 변경 시 자동 업데이트를 방지
-                        if (!isUserSeeking) {
-                            seekBar.progress = second.toInt()
-                        }
-                    }
-                })
-
+            if (isBluetoothConnectGranted && isBluetoothScanGranted) {
+                connectToBluetoothDevice()
+            } else {
+                Toast.makeText(context, "블루투스 권한이 필요합니다.", Toast.LENGTH_SHORT).show()
             }
-        })
+        }
+
+        // 권한 확인 후 연결 시도
+        checkBluetoothPermission()
 
         seekBar.setOnSeekBarChangeListener(object : SeekBar.OnSeekBarChangeListener {
             override fun onProgressChanged(seekBar: SeekBar?, progress: Int, fromUser: Boolean) {
@@ -164,16 +172,6 @@ class Fragment1 : Fragment() {
                 isUserSeeking = false
             }
         })
-
-
-        // 서버에서 유튜브 URL을 받아오고 해당 URL로 비디오를 재생
-        playButton.setOnClickListener {
-            if (viewModel.isBluetoothConnected.value == true) {
-                fetchYouTubeUrlFromServer()
-            } else {
-                Toast.makeText(requireContext(), "블루투스 연결 후 시도해주세요.", Toast.LENGTH_SHORT).show()
-            }
-        }
 
         pauseButton.setOnClickListener {
             youTubePlayer?.pause()
@@ -210,6 +208,167 @@ class Fragment1 : Fragment() {
             AirQualityValue.text = "밝기 : $brightness"
         })
         return view
+    }
+
+    private fun checkBluetoothPermission() {
+        if (ActivityCompat.checkSelfPermission(
+                requireContext(), Manifest.permission.BLUETOOTH_CONNECT
+            ) != PackageManager.PERMISSION_GRANTED ||
+            ActivityCompat.checkSelfPermission(
+                requireContext(), Manifest.permission.BLUETOOTH_SCAN
+            ) != PackageManager.PERMISSION_GRANTED
+        ) {
+            requestBluetoothPermissionLauncher.launch(
+                arrayOf(
+                    Manifest.permission.BLUETOOTH_CONNECT,
+                    Manifest.permission.BLUETOOTH_SCAN
+                )
+            )
+        } else {
+            connectToBluetoothDevice()
+        }
+    }
+
+    private fun connectToBluetoothDevice() {
+        if (!bluetoothAdapter.isEnabled) {
+            Toast.makeText(context, "블루투스를 활성화해주세요.", Toast.LENGTH_SHORT).show()
+            return
+        }
+
+        try {
+            val device: BluetoothDevice = bluetoothAdapter.getRemoteDevice(HC06_MAC_ADDRESS)
+            bluetoothSocket = device.createRfcommSocketToServiceRecord(UUID_HC06)
+            bluetoothSocket?.connect()
+
+            Toast.makeText(context, "HC-06에 연결되었습니다.", Toast.LENGTH_SHORT).show()
+            // Save the socket in the ViewModel
+            viewModel.bluetoothSocket = bluetoothSocket
+            viewModel.setBluetoothConnected(true) // 연결 상태 업데이트
+            // Start reading data
+            readDataFromBluetooth()
+
+        } catch (e: SecurityException) {
+            Log.e("Bluetooth", "권한 오류: ${e.message}")
+            //   dismissConnectingDialog()  // 연결 성공 시 팝업창 닫기
+            Toast.makeText(context, "블루투스 권한이 없습니다.", Toast.LENGTH_SHORT).show()
+        } catch (e: Exception) {
+            Log.e("Bluetooth", "연결 실패: ${e.message}")
+            //  dismissConnectingDialog()  // 연결 성공 시 팝업창 닫기
+            viewModel.setBluetoothConnected(false) // 연결 실패 시 업데이트
+            Toast.makeText(context, "연결에 실패했습니다.", Toast.LENGTH_SHORT).show()
+        }
+    }
+
+    private fun readDataFromBluetooth() {
+        val inputStream: InputStream? = bluetoothSocket?.inputStream
+        if (inputStream == null)
+        {
+            return
+        }
+
+        val handler = Handler(Looper.getMainLooper())
+        readBuffer = ByteArray(1024)
+        readBufferPosition = 0
+        workerThread = Thread {
+            try {
+                while (!Thread.currentThread().isInterrupted) {
+                    val bytesAvailable = inputStream.available()
+                    if (bytesAvailable > 0) {
+                        val buffer = ByteArray(bytesAvailable)
+                        inputStream.read(buffer)
+
+                        for (i in 0 until bytesAvailable) {
+                            val byte = buffer[i]
+                            if (byte == '\n'.code.toByte()) {
+                                val message = String(readBuffer, 0, readBufferPosition, Charsets.UTF_8).trim()
+                                readBufferPosition = 0  // 버퍼 초기화
+
+                                // 데이터 파싱
+                                val dataParts = message.split("|")
+                                if (dataParts.size == 9) {
+                                    val heartRate = dataParts[0]
+                                    val CO = dataParts[1]
+                                    val Alcohol = dataParts[2]
+                                    val CO2 = dataParts[3]
+                                    val Tolueno = dataParts[4]
+                                    val NH4 = dataParts[5]
+                                    val Acetona = dataParts[6]
+                                    val temperature = dataParts[7]
+                                    val humidity = dataParts[8]
+
+
+                                    // 모든 센서 데이터를 서버로 전송
+                                    sendDataToServer(heartRate, CO, Alcohol, CO2, Tolueno, NH4, Acetona, temperature, humidity)
+
+                                    // 심박수 표시
+                                    handler.post {
+                                        textViewReceive.text = "BPM : $heartRate"
+                                        // ViewModel에 심박수 값 설정
+                                        viewModel.setHeartRate(heartRate)
+                                        // ViewModel에 온도 값 설정
+                                        viewModel.updateTemperature(temperature)
+
+                                        // Fragment2로 데이터 전송
+                                        val mainActivity = activity as? MainActivity
+                                        mainActivity?.onBluetoothDataReceived(CO, Alcohol, CO2, Tolueno, NH4, Acetona, temperature, humidity)
+
+                                    }
+
+                                } else {
+                                    Log.e("Bluetooth", "유효하지 않은 데이터 형식: $message")
+                                }
+                            } else if (readBufferPosition < readBuffer.size) {
+                                readBuffer[readBufferPosition++] = byte
+                            }
+                        }
+                    }
+                }
+            } catch (e: IOException) {
+                e.printStackTrace()
+                handler.post {
+                    Toast.makeText(context, "데이터 수신 중 오류: ${e.message}", Toast.LENGTH_SHORT).show()
+                }
+            }
+        }
+        workerThread?.start()
+    }
+
+    private fun sendDataToServer(
+        heartRate: String,
+        CO: String,
+        Alcohol: String,
+        CO2: String,
+        Tolueno: String,
+        NH4: String,
+        Acetona: String,
+        temperature: String,
+        humidity: String
+    ) {
+        val deviceId = Settings.Secure.getString(requireContext().contentResolver, Settings.Secure.ANDROID_ID)
+        val sensorData = SensorData(heartRate, CO, Alcohol, CO2, Tolueno, NH4, Acetona, temperature, humidity, deviceId)
+
+        RetrofitClient.sensorApiService.postSensorData(sensorData).enqueue(object : Callback<ServerResponse> {
+            override fun onResponse(call: Call<ServerResponse>, response: Response<ServerResponse>) {
+                if (response.isSuccessful) {
+                    //Toast.makeText(context, "서버에 데이터 전송 성공", Toast.LENGTH_SHORT).show()
+                } else {
+                    Toast.makeText(context, "서버 응답 오류: ${response.code()}", Toast.LENGTH_SHORT).show()
+                }
+            }
+            override fun onFailure(call: Call<ServerResponse>, t: Throwable) {
+                Toast.makeText(context, "서버 전송 실패: ${t.message}", Toast.LENGTH_SHORT).show()
+            }
+        })
+    }
+
+    override fun onDestroy() {
+        super.onDestroy()
+        try {
+            workerThread?.interrupt()
+            bluetoothSocket?.close()
+        } catch (e: IOException) {
+            e.printStackTrace()
+        }
     }
 
     // 서버에서 유튜브 URL을 받아와서 비디오를 로드하는 메서드

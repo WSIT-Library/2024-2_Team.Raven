@@ -1,6 +1,6 @@
-package com.example.p
+package com.example.p.Fragments
 
-import AirQualityResponse
+import com.example.p.Response.AirQualityResponse
 import android.Manifest
 import android.content.pm.PackageManager
 import android.location.Address
@@ -12,10 +12,11 @@ import android.view.View
 import android.view.ViewGroup
 import androidx.core.app.ActivityCompat
 import androidx.fragment.app.Fragment
-import android.util.Log
 import android.widget.Button
 import android.widget.TextView
 import android.widget.Toast
+import com.example.p.R
+import com.example.p.RetrofitClient
 import com.google.android.gms.location.FusedLocationProviderClient
 import com.google.android.gms.location.LocationServices
 import com.google.android.gms.tasks.OnSuccessListener

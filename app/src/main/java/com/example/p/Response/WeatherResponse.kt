@@ -1,3 +1,5 @@
+package com.example.p.Response
+
 data class WeatherResponse(
     val main: WeatherMain
 )

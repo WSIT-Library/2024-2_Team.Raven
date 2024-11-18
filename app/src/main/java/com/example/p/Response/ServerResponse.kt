@@ -1,4 +1,4 @@
-package com.example.p
+package com.example.p.Response
 
 data class SensorData(
     val heartRate: String,

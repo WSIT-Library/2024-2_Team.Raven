@@ -1,3 +1,5 @@
+package com.example.p.Response
+
 data class AirQualityResponse(
     val coord: Coord,
     val list: List<AirQualityData>

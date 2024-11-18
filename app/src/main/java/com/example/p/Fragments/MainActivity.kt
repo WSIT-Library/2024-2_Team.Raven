@@ -1,36 +1,12 @@
-package com.example.p
+package com.example.p.Fragments
 import android.content.Context
 import android.provider.Settings
-import android.Manifest
-import android.app.AlertDialog
-import android.bluetooth.BluetoothAdapter
-import android.bluetooth.BluetoothDevice
-import android.bluetooth.BluetoothSocket
-import android.content.Intent
-import android.content.pm.PackageManager
-import android.os.Looper
-import android.widget.EditText
-import androidx.core.app.ActivityCompat
-import java.io.IOException
-import java.io.InputStream
-import java.io.OutputStream
-import java.util.UUID
-import java.util.logging.Handler
-import AirQualityResponse
 import android.os.Bundle
-import android.util.Log
-import android.widget.SeekBar
-import android.widget.TextView
-import androidx.activity.ComponentActivity
-import androidx.activity.enableEdgeToEdge
 import android.widget.Button
-import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
-import androidx.fragment.app.Fragment
 import androidx.viewpager2.widget.ViewPager2
-import retrofit2.Call
-import retrofit2.Callback
-import retrofit2.Response
+import com.example.p.R
+import com.example.p.ViewPagerAdapter
 
 
 class MainActivity : AppCompatActivity() {
@@ -61,6 +37,8 @@ class MainActivity : AppCompatActivity() {
     fun setBluetoothDataListener(listener: (AirQualityData) -> Unit) {
         bluetoothDataListener = listener
     }
+
+
 
     // 블루투스 데이터 수신 처리
     fun onBluetoothDataReceived(CO: String, Alcohol: String, CO2: String, Tolueno: String, NH4: String, Acetona: String, temperature: String, humidity: String) {
