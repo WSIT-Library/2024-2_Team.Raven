@@ -3,15 +3,13 @@ package com.example.p
 import com.example.p.ApiService.AirQualityApiService
 import com.example.p.ApiService.SensorApiService
 import com.example.p.ApiService.WeatherApiService
-import com.example.p.ApiService.YouTubeApiService
 import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
 
 object RetrofitClient {
     private const val BASE_URL = "https://api.openweathermap.org/"
-    private const val HEART_RATE_BASE_URL = "https://124d-210-93-86-104.ngrok-free.app/"  // 적절한 URL로 변경
-   // private const val YOUTUBE_BASE_URL = "https://ca7d-210-93-86-104.ngrok-free.app/"
-    private const val YOUTUBE_BASE_URL = "https://www.googleapis.com/youtube/v3/"
+    private const val HEART_RATE_BASE_URL = "https://f877-210-93-86-104.ngrok-free.app/" // 적절한 URL로 변경
+
 
     private val retrofit by lazy {
         Retrofit.Builder()
@@ -27,12 +25,6 @@ object RetrofitClient {
             .build()
     }
 
-    private val youtubeRetrofit by lazy {
-        Retrofit.Builder()
-            .baseUrl(YOUTUBE_BASE_URL)
-            .addConverterFactory(GsonConverterFactory.create())
-            .build()
-    }
 
     val weatherApiService: WeatherApiService by lazy {
         retrofit.create(WeatherApiService::class.java)
@@ -46,11 +38,8 @@ object RetrofitClient {
         retrofit.create(SensorApiService::class.java)
     }
 
-
-    // YouTube API 서비스
-    val youtubeApiService: YouTubeApiService by lazy {
-        youtubeRetrofit.create(YouTubeApiService::class.java)
-    }
-
-
+    val youtubeRetrofit: Retrofit = Retrofit.Builder()
+        .baseUrl("https://www.googleapis.com/youtube/v3/") // 유튜브 API의 base URL
+        .addConverterFactory(GsonConverterFactory.create())
+        .build()
 }

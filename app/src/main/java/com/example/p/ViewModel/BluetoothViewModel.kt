@@ -33,6 +33,7 @@ class BluetoothViewModel : ViewModel() {
     }
 
 
+
     // SeekBar progress 값을 저장할 LiveData 추가
     private val _brightnessValue = MutableLiveData<Int>()
     val brightnessValue: LiveData<Int> get() = _brightnessValue
