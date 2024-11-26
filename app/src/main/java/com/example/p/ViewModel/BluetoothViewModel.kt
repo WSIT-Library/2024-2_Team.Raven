@@ -43,4 +43,27 @@ class BluetoothViewModel : ViewModel() {
         _brightnessValue.value = value
     }
 
+    private val _bluetoothAQI = MutableLiveData<Int>()
+    val bluetoothAQI: LiveData<Int> get() = _bluetoothAQI
+
+    private val _airQualityAQI = MutableLiveData<Int>()
+    val airQualityAQI: LiveData<Int> get() = _airQualityAQI
+
+    fun setBluetoothAQI(value: Int) {
+        _bluetoothAQI.value = value
+    }
+
+    fun setAirQualityAQI(value: Int) {
+        _airQualityAQI.value = value
+    }
+
+    // weatherDescription 값을 저장할 LiveData 추가
+    private val _weatherDescription = MutableLiveData<String>()
+    val weatherDescription: LiveData<String> get() = _weatherDescription
+
+    // weatherDescription 값을 업데이트하는 메서드
+    fun setWeatherDescription(description: String) {
+        _weatherDescription.value = description
+    }
+
 }

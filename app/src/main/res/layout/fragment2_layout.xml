@@ -166,6 +166,15 @@
                 android:gravity="center"
                 android:text="블루투스를 연결해주세요."
                 android:textSize="16sp" />
+
+            <TextView
+                android:id="@+id/text_view_whether"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:gravity="center"
+                android:text=""
+                android:textSize="16sp" />
+
             <TextView
                 android:id="@+id/text_view_outside"
                 android:layout_width="match_parent"

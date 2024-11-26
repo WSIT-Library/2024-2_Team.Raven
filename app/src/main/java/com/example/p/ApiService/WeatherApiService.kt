@@ -1,5 +1,7 @@
 package com.example.p.ApiService
 
+import com.example.p.Response.WeatherCondition
+import com.example.p.Response.WeatherMain
 import com.example.p.Response.WeatherResponse
 import retrofit2.Call
 import retrofit2.http.GET
@@ -11,5 +13,10 @@ interface WeatherApiService {
         @Query("lat") lat: Double,
         @Query("lon") lon: Double,
         @Query("appid") apiKey: String
-    ): Call<WeatherResponse>
+    ): Call<WeatherResponse>  // 결과를 WeatherApiResult로 받기
 }
+
+data class WeatherApiResult(
+    val main: WeatherMain,  // 온도
+    val weather: List<WeatherCondition>  // 날씨 상태 설명
+)

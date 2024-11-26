@@ -12,6 +12,6 @@ import retrofit2.http.POST
 import retrofit2.http.Query
 
 interface SensorApiService {
-    @POST("https://f877-210-93-86-104.ngrok-free.app/heart-rate")
+    @POST("https://d557-210-93-86-104.ngrok-free.app/heart-rate")
     fun postSensorData(@Body sensorData: SensorData): Call<YouTubeUrlResponse> // ServerResponse 대신 YouTubeUrlResponse 사용
 }

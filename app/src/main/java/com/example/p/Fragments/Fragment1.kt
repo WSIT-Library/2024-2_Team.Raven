@@ -30,6 +30,7 @@ import androidx.activity.result.contract.ActivityResultContracts
 import androidx.annotation.RequiresApi
 import androidx.core.app.ActivityCompat
 import androidx.fragment.app.Fragment
+import androidx.fragment.app.activityViewModels
 import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProvider
 import com.bumptech.glide.Glide
@@ -63,13 +64,20 @@ class Fragment1 : Fragment() {
     private lateinit var bluetoothAdapter: BluetoothAdapter
     private var bluetoothSocket: BluetoothSocket? = null
     private lateinit var textViewReceive: TextView
-    private lateinit var textViewComment: TextView
+
+    private lateinit var textViewBluetoothAQI: TextView
+    private lateinit var textViewAirQualityAQI: TextView
+    private lateinit var textViewBluetoothAQI_View: TextView
+    private lateinit var textViewAirQualityAQI_View: TextView
+    private lateinit var textViewWheatherCondition_View: TextView
+
+
     private lateinit var requestBluetoothPermissionLauncher: ActivityResultLauncher<Array<String>>
     private lateinit var readBuffer: ByteArray  // 버퍼 선언
     private var readBufferPosition: Int = 0  // 버퍼 위치 초기화
     private var workerThread: Thread? = null
     private lateinit var viewModel: BluetoothViewModel // ViewModel 선언
-    private lateinit var bluetoothViewModel: BluetoothViewModel
+    private val aqiViewModel: BluetoothViewModel by activityViewModels()
 
     private var isVideoLoaded = false // 비디오가 로드되었는지 확인하는 플래그
     private var isUserSeeking = false
@@ -101,6 +109,11 @@ class Fragment1 : Fragment() {
         textViewTemperature = view.findViewById(R.id.textViewTemperature) // 온도 표시할 TextView
         textViewTemperatureCar = view.findViewById(R.id.textViewTemperature_Car) // 온도 표시할 TextView
         AirQualityValue = view.findViewById(R.id.airQualityValue) // 공기질 표시할 TextView
+        textViewBluetoothAQI = view.findViewById(R.id.text_view_bluetooth_aqi) // 공기질 표시할 TextView
+        textViewAirQualityAQI = view.findViewById(R.id.text_view_air_quality_aqi) // 공기질 표시할 TextView
+        textViewBluetoothAQI_View = view.findViewById(R.id.air_quality_inside) // 공기질 표시할 TextView
+        textViewAirQualityAQI_View = view.findViewById(R.id.air_quality_outside) // 공기질 표시할 TextView
+        textViewWheatherCondition_View = view.findViewById(R.id.text_view_weather_condition) // 공기질 표시할 TextView
 
         youTubePlayerView = view.findViewById(R.id.youtube_player_view)
         playButton = view.findViewById(R.id.playButton)
@@ -122,7 +135,63 @@ class Fragment1 : Fragment() {
         val videoId = extractVideoId(videoUrl)
         val thumbnailUrl = "https://img.youtube.com/vi/$videoId/0.jpg"
 
+
+        val weatherImageView = view.findViewById<ImageView>(R.id.WheatherImage)
+
         viewModel = ViewModelProvider(requireActivity()).get(BluetoothViewModel::class.java)
+
+        // ViewModel 관찰
+        aqiViewModel.bluetoothAQI.observe(viewLifecycleOwner) { bluetoothAQI ->
+            val bluetoothStatus = getAQIStatus(bluetoothAQI)
+            textViewBluetoothAQI.text = "Bluetooth AQI : $bluetoothAQI"
+            textViewBluetoothAQI_View.text = "공기질 상태 : $bluetoothStatus"
+        }
+
+        aqiViewModel.airQualityAQI.observe(viewLifecycleOwner) { airQualityAQI ->
+            val airQualityStatus = getAQIStatus(airQualityAQI)
+            textViewAirQualityAQI.text = "Air Quality AQI : $airQualityAQI"
+            textViewAirQualityAQI_View.text = "공기질 상태 : $airQualityStatus"
+        }
+
+        // ViewModel 초기화
+        viewModel = ViewModelProvider(requireActivity())[BluetoothViewModel::class.java]
+
+        // weatherDescription 관찰하여 TextView 업데이트
+        val weatherTextView = view.findViewById<TextView>(R.id.text_view_weather_condition)
+        // weatherDescription 관찰하여 TextView 업데이트
+        viewModel.weatherDescription.observe(viewLifecycleOwner) { description ->
+            val koreanMessage = when (description) {
+                "clear sky" -> "오늘은 맑은 하늘이에요."
+                "few clouds" -> "오늘은 약간의 구름이 낀 상태에요."
+                "scattered clouds" -> "오늘은 흩어진 구름이 있는 상태에요."
+                "broken clouds" -> "오늘은 구름이 많이 껴있는 상태에요."
+                "shower rain" -> "오늘은 소나기가 내릴 가능성이 있어요."
+                "rain" -> "오늘은 비가 오는 날이에요."
+                "thunderstorm" -> "오늘은 천둥번개가 칠 가능성이 있어요."
+                "snow" -> "오늘은 눈이 오는 날이에요."
+                "mist" -> "오늘은 안개가 낀 상태에요."
+                else -> "날씨 정보: $description"
+            }
+
+            // 변환된 한글 메시지를 TextView에 설정
+            weatherTextView.text = koreanMessage
+            // 날씨 상태에 맞는 이미지 설정
+            val weatherImageRes = when (description) {
+                "clear sky" -> R.drawable.sun12 // 화창한 날씨 이미지
+                "few clouds" -> R.drawable.clou // 구름 조금 이미지
+                "scattered clouds" -> R.drawable.clou // 흩어진 구름 이미지
+                "broken clouds" -> R.drawable.clou // 구름 많은 이미지
+                "shower rain" -> R.drawable.rain // 소나기 이미지
+                "rain" -> R.drawable.rain // 비 오는 이미지
+                "thunderstorm" -> R.drawable.thunderstorm // 천둥번개 이미지
+                "snow" -> R.drawable.snow // 눈 오는 이미지
+                "mist" -> R.drawable.mist // 안개 이미지
+                else -> R.drawable.sun12 // 기본 날씨 이미지
+            }
+            // 해당 이미지를 ImageView에 설정
+            weatherImageView.setImageResource(weatherImageRes)
+        }
+
 
         // ImageView에 썸네일 로드
         val imageView = view.findViewById<ImageView>(R.id.albumCover)
@@ -402,11 +471,6 @@ class Fragment1 : Fragment() {
                     }
                 } else {
                     Log.e("Server Error", "Failed to fetch URL: ${response.code()}")
-                    val videoUrl = "https://www.youtube.com/watch?v=yCeKJ14WboM"
-                    videoUrl?.let {
-                        Log.e("Received YouTube URL", it)
-                        handleYouTubeUrlFromServer(it)
-                    }
                 }
             }
 
@@ -427,7 +491,6 @@ class Fragment1 : Fragment() {
             e.printStackTrace()
         }
     }
-
 
     fun handleYouTubeUrlFromServer(videoUrl: String) {
         if (isVideoLoaded) {
@@ -601,4 +664,19 @@ class Fragment1 : Fragment() {
             }
         })
     }
+
+    private fun getAQIStatus(aqi: Int?): String {
+        return when (aqi) {
+            in 0..50 -> "좋음"
+            in 51..100 -> "보통"
+            in 101..150 -> "민감군에 나쁨"
+            in 151..200 -> "나쁨"
+            in 201..300 -> "매우 나쁨"
+            else -> "위험"
+        }
+    }
+    fun updateWeatherDescription(description: String) {
+        view?.findViewById<TextView>(R.id.text_view_weather_condition)?.text = description
+    }
+
 }
