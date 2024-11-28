@@ -52,7 +52,6 @@ class Fragment2 : Fragment() {
 
         fusedLocationClient = LocationServices.getFusedLocationProviderClient(requireActivity())
 
-        val buttonGetAirQuality: Button = view.findViewById(R.id.button_get_air_quality)
         val textViewAirQuality: TextView = view.findViewById(R.id.text_view_air_quality)
         val textViewLocation: TextView = view.findViewById(R.id.text_view_location)
         val textViewWeather: TextView = view.findViewById(R.id.text_view_whether)
@@ -141,14 +140,14 @@ class Fragment2 : Fragment() {
                         // 기존 데이터 출력
                         textView.text = """
                         AQI : $aqi
-                        CO : ${components.co} ppm
-                        NO : ${components.no} ppm
-                        NO2 : ${components.no2} ppm
-                        O3 : ${components.o3} ppm
-                        SO2 : ${components.so2} ppm
-                        PM2.5 : ${components.pm2_5} µg/m³
-                        PM10 : ${components.pm10} µg/m³
-                        NH3 : ${components.nh3} ppm
+                        CO : ${components.co}
+                        NO : ${components.no}
+                        NO2 : ${components.no2}
+                        O3 : ${components.o3}
+                        SO2 : ${components.so2}
+                        PM2.5 : ${components.pm2_5}
+                        PM10 : ${components.pm10}
+                        NH3 : ${components.nh3}
                     """.trimIndent()
                     } else {
                         textView.text = "No components data available."

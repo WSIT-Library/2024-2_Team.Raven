@@ -26,7 +26,9 @@
                 android:layout_height="249dp"
                 android:gravity="center"
                 android:orientation="vertical"
+                android:background="@drawable/radius"
                 android:padding="16dp">
+
 
                 <!-- 앨범 사진 -->
                 <ImageView
@@ -52,7 +54,9 @@
                     android:gravity="center"
                     android:marqueeRepeatLimit="marquee_forever"
                     android:singleLine="true"
+                    android:textColor="@color/white"
                     android:text="Song Title"
+                    android:fontFamily="@font/yangjin"
                     android:textSize="20sp" />
 
                 <!-- 아티스트 이름 -->
@@ -61,7 +65,10 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_marginTop="8dp"
+                    android:layout_marginLeft="24dp"
                     android:gravity="center"
+                    android:textColor="@color/white"
+                    android:fontFamily="@font/yangjin"
                     android:text="Artist Name"
                     android:textSize="16sp" />
 
@@ -86,26 +93,23 @@
                         android:id="@+id/playButton"
                         android:layout_width="55dp"
                         android:layout_height="55dp"
-                        android:layout_marginEnd="16dp"
-                        android:drawableStart="@android:drawable/ic_media_play"
-                        android:text="" />
+                        android:layout_marginEnd="20dp"
+                        android:background="@android:drawable/ic_media_play"/>
 
                     <!-- 일시정지 버튼 -->
                     <Button
                         android:id="@+id/pauseButton"
                         android:layout_width="55dp"
                         android:layout_height="55dp"
-                        android:layout_marginEnd="16dp"
-                        android:drawableStart="@android:drawable/ic_media_pause"
-                        android:text="" />
+                        android:layout_marginEnd="20dp"
+                        android:background="@android:drawable/ic_media_pause" />
 
                     <!-- 다시듣기 버튼 -->
                     <Button
                         android:id="@+id/replayButton"
                         android:layout_width="55dp"
                         android:layout_height="55dp"
-                        android:drawableStart="@android:drawable/ic_media_previous"
-                        android:text="" />
+                        android:background="@android:drawable/ic_media_previous" />
                 </LinearLayout>
                 <!-- SeekBar -->
                 <SeekBar
@@ -126,12 +130,16 @@
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:layout_weight="1"
+                        android:textColor="@color/white"
+                        android:fontFamily="@font/yangjin"
                         android:text="00:00" />
 
                     <TextView
                         android:id="@+id/totalTime"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
+                        android:textColor="@color/white"
+                        android:fontFamily="@font/yangjin"
                         android:text="00:00" />
 
 
@@ -143,7 +151,9 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="16dp"
+                android:textColor="@color/white"
                 android:text="현재 위치를 가져오는 중..."
+                android:fontFamily="@font/yangjin"
                 android:textSize="17sp"
                 android:textStyle="bold" />
             <!-- 중간 섹션 - 내부 및 외부 공기 질 및 온도 (이미지 및 분할선 포함) -->
@@ -152,10 +162,13 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:orientation="horizontal"
+                android:background="@drawable/radiustop"
+                android:fontFamily="@font/yangjin"
                 android:padding="16dp">
 
                 <!-- 내부 섹션 -->
                 <LinearLayout
+
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
                     android:layout_weight="1"
@@ -166,8 +179,9 @@
                         android:id="@+id/air_quality_inside_label"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:text="차량 내 공기질"
-                        android:textColor="@android:color/black"
+                        android:text="차량 내부 공기질"
+                        android:textColor="@android:color/white"
+                        android:fontFamily="@font/yangjin"
                         android:textSize="16sp"
                         android:textStyle="bold" />
                     <!-- 내부 공기질 -->
@@ -175,13 +189,17 @@
                         android:id="@+id/text_view_bluetooth_aqi"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:text="블루투스를 연결해주세요." />
+                        android:fontFamily="@font/yangjin"
+                        android:text="블루투스를 연결해주세요."
+                        android:textColor="@android:color/white"/>
 
                     <TextView
                         android:id="@+id/air_quality_inside"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
+                        android:fontFamily="@font/yangjin"
                         android:text=""
+                        android:textColor="@android:color/white"
                         android:textSize="14sp" />
 
                     <!-- 가로 분할선 -->
@@ -198,9 +216,10 @@
                         android:id="@+id/temperature_Inside"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:text="차량 내 온도"
-                        android:textColor="@android:color/black"
+                        android:text="차량 내부 온도"
+                        android:textColor="@android:color/white"
                         android:textSize="16sp"
+                        android:fontFamily="@font/yangjin"
                         android:textStyle="bold" />
 
                     <TextView
@@ -208,6 +227,8 @@
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:text="블루투스를 연결해주세요."
+                        android:textColor="@android:color/white"
+                        android:fontFamily="@font/yangjin"
                         android:textSize="14sp" />
 
                 </LinearLayout>
@@ -230,31 +251,35 @@
                         android:id="@+id/air_quality_Outside_label"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:text="외부 공기질"
+                        android:text="차량 외부 공기질"
+                        android:textColor="@android:color/white"
+                        android:fontFamily="@font/yangjin"
                         android:textSize="16sp"
-                        android:textStyle="bold"
-                        android:textColor="@android:color/black"
-                        />
+                        android:textStyle="bold" />
                     <!-- 외부 공기질 -->
                     <TextView
                         android:id="@+id/text_view_air_quality_aqi"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:text="Air Quality AQI : " />
+                        android:text="Air Quality AQI : "
+                        android:fontFamily="@font/yangjin"
+                        android:textColor="@android:color/white"/>
 
                     <TextView
                         android:id="@+id/air_quality_outside"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:text=""
+                        android:textColor="@android:color/white"
+                        android:fontFamily="@font/yangjin"
                         android:textSize="14sp" />
 
                     <!-- 가로 분할선 -->
                     <View
                         android:layout_width="match_parent"
                         android:layout_height="1dp"
-                        android:background="#CCCCCC"
-                        android:layout_marginVertical="8dp" />
+                        android:layout_marginVertical="8dp"
+                        android:background="#CCCCCC" />
 
                     <!-- 외부 온도 -->
                     <ImageView
@@ -266,29 +291,34 @@
                         android:id="@+id/temperature_Outside"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:text="외부 온도"
+                        android:text="차량 외부 온도"
+                        android:textColor="@android:color/white"
+                        android:fontFamily="@font/yangjin"
                         android:textSize="16sp"
-                        android:textStyle="bold"
-                        android:textColor="@android:color/black"
-                        />
+                        android:textStyle="bold" />
 
                     <TextView
                         android:id="@+id/textViewTemperature"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:text="현재 위치를 가져오는 중..."
+                        android:fontFamily="@font/yangjin"
+                        android:textColor="@android:color/white"
                         android:textSize="14sp" />
 
                 </LinearLayout>
             </LinearLayout>
 
-
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:orientation="horizontal"
+                android:background="@drawable/radiusbottom"
                 android:padding="16dp">
 
+                <!-- 내부 섹션 -->
+
+                <!-- 분할선 -->
 
                 <!-- 외부 섹션 -->
                 <LinearLayout
@@ -298,34 +328,40 @@
                     android:orientation="vertical"
                     android:padding="8dp">
 
-                    <!-- 가로 분할선 -->
                     <TextView
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:text="현재 날씨"
+                        android:textColor="@android:color/white"
                         android:textSize="16sp"
-                        android:textStyle="bold"
-                        android:textColor="@android:color/black"
-                        />
+                        android:fontFamily="@font/yangjin"
+                        android:textStyle="bold" />
+
+                    <!-- 분할선 -->
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text=""
+                        android:textSize="14sp" />
 
                     <ImageView
                         android:id="@+id/WheatherImage"
                         android:layout_width="match_parent"
-                        android:layout_height="127dp" />
+                        android:layout_height="127dp"
+                        android:src="@drawable/sun12" />
 
                     <TextView
                         android:id="@+id/text_view_weather_condition"
-                        android:layout_marginTop="16dp"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
+                        android:layout_marginTop="16dp"
                         android:gravity="center"
                         android:text="현재 날씨 상태를 가져오는 중이에요..."
-                        android:textColor="@android:color/darker_gray"
+                        android:fontFamily="@font/yangjin"
+                        android:textColor="@android:color/white"
                         android:textSize="16sp" />
 
-
                 </LinearLayout>
-
             </LinearLayout>
 
             <!-- 밝기 조절 SeekBar -->
@@ -333,55 +369,61 @@
                 android:id="@+id/brightnessSeekBar"
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="8dp"/>
+                android:layout_marginTop="8dp" />
 
             <!-- 심박수 체크 섹션 -->
             <TextView
                 android:id="@+id/heartRateTitle"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
+                android:layout_marginTop="32dp"
                 android:text="현재 심박수"
+                android:textColor="@android:color/white"
                 android:textSize="24sp"
-                android:textStyle="bold"
-                android:textColor="@android:color/black"
-                android:layout_marginTop="32dp"/>
+                android:fontFamily="@font/yangjin"
+                android:textStyle="bold" />
 
             <TextView
                 android:id="@+id/textViewReceive"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
+                android:layout_marginTop="8dp"
                 android:text="블루투스를 연결해주세요."
-                android:textSize="18sp"
-                android:textColor="@android:color/darker_gray"
-                android:layout_marginTop="8dp"/>
+                android:textColor="@android:color/white"
+                android:fontFamily="@font/yangjin"
+                android:textSize="18sp" />
 
             <!-- 공기질 관리 섹션 -->
             <TextView
                 android:id="@+id/airQualityTitle"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
+                android:layout_marginTop="32dp"
                 android:text="조명 밝기"
+                android:textColor="@android:color/white"
                 android:textSize="24sp"
-                android:textStyle="bold"
-                android:textColor="@android:color/black"
-                android:layout_marginTop="32dp"/>
+                android:fontFamily="@font/yangjin"
+                android:textStyle="bold" />
 
             <TextView
                 android:id="@+id/airQualityValue"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
+                android:layout_margin="8dp"
+                android:layout_marginBottom="50dp"
                 android:text="조명 밝기 칸에서 조명을 조절할 수 있어요."
-                android:textSize="18sp"
-                android:textColor="@android:color/darker_gray"
-                android:layout_marginTop="8dp"/>
+                android:textColor="@android:color/white"
+                android:fontFamily="@font/yangjin"
+                android:textSize="18sp" />
 
             <TextView
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
-                android:text="Raven"
-                android:textSize="18sp"
+                android:layout_marginTop="20dp"
                 android:gravity="center"
-                android:layout_marginTop="100dp"/>
+                android:text=""
+                android:fontFamily="@font/yangjin"
+                android:textSize="18sp" />
 
         </LinearLayout>
 

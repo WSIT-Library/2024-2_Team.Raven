@@ -10,14 +10,17 @@
     <androidx.viewpager2.widget.ViewPager2
         android:id="@+id/viewPager"
         android:layout_width="match_parent"
-        android:layout_height="match_parent"/>
+        android:layout_height="match_parent"
+        android:background="@drawable/back3"/>
 
     <LinearLayout
         android:id="@+id/buttonLayout"
+
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="horizontal"
         android:layout_alignParentBottom="true"
+
         android:weightSum="4">
 
         <Button
@@ -26,6 +29,7 @@
             android:layout_height="wrap_content"
             android:layout_weight="1"
             android:background="@drawable/button_background"
+            android:fontFamily="@font/yangjin"
             android:text="메인" />
         <Button
             android:id="@+id/button_air"
@@ -33,22 +37,23 @@
             android:layout_height="wrap_content"
             android:layout_weight="1"
             android:background="@drawable/button_background"
+            android:fontFamily="@font/yangjin"
             android:text="현재 공기질" />
-
         <Button
             android:id="@+id/button_heart"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_weight="1"
             android:background="@drawable/button_background"
+            android:fontFamily="@font/yangjin"
             android:text="심박수" />
-
         <Button
             android:id="@+id/button_light"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_weight="1"
             android:background="@drawable/button_background"
+            android:fontFamily="@font/yangjin"
             android:text="조명 밝기" />
     </LinearLayout>
 

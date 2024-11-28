@@ -30,18 +30,18 @@
 
                 <!-- 현재 온도 -->
                 <TextView
+                    android:fontFamily="@font/yangjin"
                     android:id="@+id/songTitle"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:gravity="center"
                     android:text="현재 공기질"
+                    android:textColor="@android:color/white"
                     android:textSize="40sp"
                     android:textStyle="bold" />
             </LinearLayout>
 
             <LinearLayout
-
-
                 android:id="@+id/environment_section1"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
@@ -56,13 +56,15 @@
                     android:orientation="vertical"
                     android:padding="8dp">
 
+
+                    <!-- 내부 온도 -->
                     <TextView
+                        android:fontFamily="@font/yangjin"
                         android:id="@+id/temperature_Outside"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-
-                        android:text="외부 공기질"
-                        android:textColor="@android:color/black"
+                        android:text="차량 외부 공기질"
+                        android:textColor="@android:color/white"
                         android:textSize="16sp" />
 
                     <!-- 가로 분할선 -->
@@ -79,12 +81,15 @@
                         android:layout_width="match_parent"
                         android:layout_height="match_parent">
                     <TextView
+                        android:fontFamily="@font/yangjin"
                         android:id="@+id/text_view_air_quality"
                         android:layout_width="match_parent"
                         android:layout_height="match_parent"
                         android:gravity="center"
                         android:layout_weight="1"
-                        android:text="초기화를 진행해주세요." />
+                        android:text="초기화를 진행해주세요."
+                        android:textColor="@android:color/white"
+                        />
                 </LinearLayout>
 
                     <View
@@ -94,10 +99,12 @@
                         android:background="#CCCCCC" />
 
                     <TextView
+                        android:fontFamily="@font/yangjin"
                         android:id="@+id/text_view_location"
                         android:layout_width="match_parent"
                         android:layout_height="match_parent"
                         android:text="초기화를 진행해주세요."
+                        android:textColor="@android:color/white"
                         android:textStyle="bold"
                         android:textSize="13sp"
                         android:gravity="center"
@@ -121,12 +128,12 @@
                     android:padding="8dp">
 
                     <TextView
+                        android:fontFamily="@font/yangjin"
                         android:id="@+id/temperature_Inside"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-
                         android:text="차량 내부 공기질"
-                        android:textColor="@android:color/black"
+                        android:textColor="@android:color/white"
                         android:textSize="16sp" />
 
                     <!-- 가로 분할선 -->
@@ -136,12 +143,14 @@
                         android:layout_marginVertical="8dp"
                         android:background="#CCCCCC" />
                     <TextView
+                        android:fontFamily="@font/yangjin"
                         android:id="@+id/text_view_bluetooth_data"
                         android:layout_width="match_parent"
                         android:layout_height="match_parent"
                         android:gravity="center"
                         android:layout_weight="1"
-                        android:text="차량을 연결해주세요." />
+                        android:text="차량을 연결해주세요."
+                        android:textColor="@android:color/white"/>
                     <LinearLayout
                         android:layout_width="match_parent"
                         android:layout_height="match_parent"/>
@@ -155,14 +164,19 @@
 
                 </LinearLayout>
             </LinearLayout>
-            <Button
-                android:id="@+id/button_get_air_quality"
-                android:layout_width="match_parent"
-                android:layout_height="match_parent"
-                android:text="초기화"
-                android:layout_centerInParent="true" />
 
             <TextView
+                android:fontFamily="@font/yangjin"
+                android:id="@+id/text_view_inside"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:gravity="center"
+                android:text="블루투스를 연결해주세요."
+                android:textSize="16sp"
+                android:textColor="@android:color/white"/>
+
+            <TextView
+                android:fontFamily="@font/yangjin"
                 android:id="@+id/text_view_whether"
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
@@ -171,9 +185,10 @@
                 android:textSize="16sp" />
 
             <TextView
+                android:fontFamily="@font/yangjin"
                 android:id="@+id/text_view_outside"
                 android:layout_width="match_parent"
-                android:layout_height="21dp"
+                android:layout_height="match_parent"
                 android:gravity="center"
                 android:text=""
                 android:textSize="16sp"

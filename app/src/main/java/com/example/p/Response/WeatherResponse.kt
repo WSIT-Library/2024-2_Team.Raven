@@ -9,7 +9,6 @@ data class WeatherMain(
     val temp: Double  // 온도 값
 )
 
-
 data class WeatherCondition(
     val description: String  // 날씨 설명 (예: 맑음, 비, 구름 등)
 )

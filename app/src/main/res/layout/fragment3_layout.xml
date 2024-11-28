@@ -26,16 +26,16 @@
                 android:orientation="vertical"
                 android:padding="16dp">
 
-
-                <!-- 현재 온도 -->
                 <TextView
+                    android:fontFamily="@font/yangjin"
                     android:id="@+id/songTitle"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:gravity="center"
                     android:text="심박수"
                     android:textSize="40sp"
-                    android:textStyle="bold" />
+                    android:textStyle="bold"
+                    android:textColor="@android:color/white"/>
             </LinearLayout>
 
             <LinearLayout
@@ -58,11 +58,12 @@
 
 
                     <TextView
+                        android:fontFamily="@font/yangjin"
                         android:id="@+id/HeartRate"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:text="현재 당신의 BPM"
-                        android:textColor="@android:color/black"
+                        android:textColor="@android:color/white"
                         android:textSize="16sp" />
 
                     <!-- 가로 분할선 -->
@@ -79,7 +80,7 @@
                         <ImageView
                             android:id="@+id/imageViewGif"
                             android:layout_width="match_parent"
-                            android:layout_height="250dp"
+                            android:layout_height="259dp"
                             app:srcCompat="@drawable/your_gif_file"
                             android:scaleType="centerCrop"/>
 
@@ -93,14 +94,17 @@
                         android:background="#CCCCCC" />
 
                     <TextView
+                        android:fontFamily="@font/yangjin"
                         android:id="@+id/textViewReceive"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:text="블루투스를 연결해주세요."
                         android:textSize="18sp"
                         android:padding="16dp"
-                        android:gravity="center"/>
+                        android:gravity="center"
+                        android:textColor="@android:color/white"/>
                     <TextView
+                        android:fontFamily="@font/yangjin"
                         android:id="@+id/textViewComment"
                         android:layout_width="match_parent"
                         android:layout_height="match_parent"

@@ -27,16 +27,16 @@
                 android:orientation="vertical"
                 android:padding="16dp">
 
-
-                <!-- 현재 온도 -->
                 <TextView
+                    android:fontFamily="@font/yangjin"
                     android:id="@+id/songTitle"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:gravity="center"
                     android:text="조명 밝기"
                     android:textSize="40sp"
-                    android:textStyle="bold" />
+                    android:textStyle="bold"
+                    android:textColor="@android:color/white"/>
 
 
 
@@ -57,14 +57,6 @@
                     android:orientation="vertical"
                     android:padding="8dp">
 
-                    <TextView
-                        android:id="@+id/HeartRate"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="조명 밝기"
-                        android:textColor="@android:color/black"
-                        android:textSize="16sp" />
-
                     <!-- 가로 분할선 -->
                     <View
                         android:layout_width="match_parent"
@@ -80,6 +72,7 @@
                             android:id="@+id/Light_Image"
                             android:layout_width="match_parent"
                             android:layout_height="250dp"
+                            android:background="@android:color/transparent"
                             app:srcCompat="@drawable/light" />
 
                     </LinearLayout>
@@ -95,26 +88,31 @@
                     <SeekBar
                         android:id="@+id/brightnessSeekBar"
                         android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
+                        android:layout_height="40dp"
                         android:max="255" />
 
                     <TextView
+                        android:fontFamily="@font/yangjin"
                         android:id="@+id/brightnessValueText"
                         android:layout_width="match_parent"
                         android:layout_height="match_parent"
                         android:text="밝기 : 0"
                         android:textStyle="bold"
-                        android:textSize="30sp"
+                        android:textSize="20sp"
                         android:gravity="center"
+                        android:textColor="@android:color/white"
+                        android:layout_marginTop="16dp"
                         />
                     <TextView
+                        android:fontFamily="@font/yangjin"
                         android:id="@+id/textViewReceive"
                         android:layout_width="match_parent"
                         android:layout_height="match_parent"
                         android:text="따로 설정을 하지 않는다면 AI가 자동으로 설정해줘요."
                         android:textSize="14sp"
                         android:gravity="center"
-                        />
+                        android:textColor="@android:color/white"
+                        android:layout_marginTop="16dp" />
                 </LinearLayout>
             </LinearLayout>
 
