@@ -79,7 +79,7 @@
                         <ImageView
                             android:id="@+id/imageViewGif"
                             android:layout_width="match_parent"
-                            android:layout_height="259dp"
+                            android:layout_height="250dp"
                             app:srcCompat="@drawable/your_gif_file"
                             android:scaleType="centerCrop"/>
 

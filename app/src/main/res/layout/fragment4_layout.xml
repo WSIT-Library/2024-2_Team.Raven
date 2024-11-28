@@ -57,6 +57,14 @@
                     android:orientation="vertical"
                     android:padding="8dp">
 
+                    <TextView
+                        android:id="@+id/HeartRate"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="조명 밝기"
+                        android:textColor="@android:color/black"
+                        android:textSize="16sp" />
+
                     <!-- 가로 분할선 -->
                     <View
                         android:layout_width="match_parent"
@@ -71,7 +79,7 @@
                         <ImageView
                             android:id="@+id/Light_Image"
                             android:layout_width="match_parent"
-                            android:layout_height="378dp"
+                            android:layout_height="250dp"
                             app:srcCompat="@drawable/light" />
 
                     </LinearLayout>

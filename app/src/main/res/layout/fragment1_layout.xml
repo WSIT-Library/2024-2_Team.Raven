@@ -132,7 +132,7 @@
                         android:id="@+id/totalTime"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:text="03:30" />
+                        android:text="00:00" />
 
 
                 </LinearLayout>
@@ -282,15 +282,13 @@
                 </LinearLayout>
             </LinearLayout>
 
+
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:orientation="horizontal"
                 android:padding="16dp">
 
-                <!-- 내부 섹션 -->
-
-                <!-- 분할선 -->
 
                 <!-- 외부 섹션 -->
                 <LinearLayout
@@ -300,16 +298,7 @@
                     android:orientation="vertical"
                     android:padding="8dp">
 
-                    <!-- 외부 공기질 -->
-
-                    <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text=""
-                        android:textSize="14sp" />
-
                     <!-- 가로 분할선 -->
-
                     <TextView
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
@@ -322,8 +311,7 @@
                     <ImageView
                         android:id="@+id/WheatherImage"
                         android:layout_width="match_parent"
-                        android:layout_height="127dp"
-                        android:src="@drawable/sun12" />
+                        android:layout_height="127dp" />
 
                     <TextView
                         android:id="@+id/text_view_weather_condition"
@@ -335,7 +323,9 @@
                         android:textColor="@android:color/darker_gray"
                         android:textSize="16sp" />
 
+
                 </LinearLayout>
+
             </LinearLayout>
 
             <!-- 밝기 조절 SeekBar -->

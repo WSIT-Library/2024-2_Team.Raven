@@ -43,6 +43,7 @@ import com.example.p.Response.YouTubeUrlResponse
 import com.example.p.RetrofitClient.sensorApiService
 import com.google.android.gms.location.FusedLocationProviderClient
 import com.google.android.gms.location.LocationServices
+import com.google.android.gms.tasks.OnSuccessListener
 import com.pierfrancescosoffritti.androidyoutubeplayer.core.player.YouTubePlayer
 import com.pierfrancescosoffritti.androidyoutubeplayer.core.player.listeners.AbstractYouTubePlayerListener
 import com.pierfrancescosoffritti.androidyoutubeplayer.core.player.views.YouTubePlayerView
@@ -136,6 +137,7 @@ class Fragment1 : Fragment() {
         val thumbnailUrl = "https://img.youtube.com/vi/$videoId/0.jpg"
 
 
+
         val weatherImageView = view.findViewById<ImageView>(R.id.WheatherImage)
 
         viewModel = ViewModelProvider(requireActivity()).get(BluetoothViewModel::class.java)
@@ -161,20 +163,20 @@ class Fragment1 : Fragment() {
         // weatherDescription 관찰하여 TextView 업데이트
         viewModel.weatherDescription.observe(viewLifecycleOwner) { description ->
             val koreanMessage = when (description) {
-                "clear sky" -> "오늘은 맑은 하늘이에요."
+                "clear sky" -> "오늘은 하늘이 맑아요."
                 "few clouds" -> "오늘은 약간의 구름이 낀 상태에요."
-                "scattered clouds" -> "오늘은 흩어진 구름이 있는 상태에요."
+                "scattered clouds" -> "오늘은 구름이 조금 있는 상태에요."
                 "broken clouds" -> "오늘은 구름이 많이 껴있는 상태에요."
                 "shower rain" -> "오늘은 소나기가 내릴 가능성이 있어요."
-                "rain" -> "오늘은 비가 오는 날이에요."
+                "light rain" -> "오늘은 비가 오는 날이에요."
                 "thunderstorm" -> "오늘은 천둥번개가 칠 가능성이 있어요."
-                "snow" -> "오늘은 눈이 오는 날이에요."
+                "light snow" -> "오늘은 눈이 오는 날이에요."
                 "mist" -> "오늘은 안개가 낀 상태에요."
                 else -> "날씨 정보: $description"
             }
-
             // 변환된 한글 메시지를 TextView에 설정
             weatherTextView.text = koreanMessage
+
             // 날씨 상태에 맞는 이미지 설정
             val weatherImageRes = when (description) {
                 "clear sky" -> R.drawable.sun12 // 화창한 날씨 이미지
@@ -182,9 +184,9 @@ class Fragment1 : Fragment() {
                 "scattered clouds" -> R.drawable.clou // 흩어진 구름 이미지
                 "broken clouds" -> R.drawable.clou // 구름 많은 이미지
                 "shower rain" -> R.drawable.rain // 소나기 이미지
-                "rain" -> R.drawable.rain // 비 오는 이미지
+                "light rain" -> R.drawable.rain // 비 오는 이미지
                 "thunderstorm" -> R.drawable.thunderstorm // 천둥번개 이미지
-                "snow" -> R.drawable.snow // 눈 오는 이미지
+                "light snow" -> R.drawable.snow // 눈 오는 이미지
                 "mist" -> R.drawable.mist // 안개 이미지
                 else -> R.drawable.sun12 // 기본 날씨 이미지
             }
@@ -208,15 +210,17 @@ class Fragment1 : Fragment() {
                 Log.d("YouTubePlayer", "YouTubePlayer is ready")
             }
         })
-        // 비디오가 로드된 후 총 시간을 가져오기
         youTubePlayer?.addListener(object : AbstractYouTubePlayerListener() {
             override fun onVideoDuration(youTubePlayer: YouTubePlayer, duration: Float) {
                 super.onVideoDuration(youTubePlayer, duration)
 
-                // 비디오의 총 시간을 가져옴
-                val totalMinutes = (duration / 60).toInt()  // 분
+                // 비디오의 총 시간을 시:분:초로 변환
+                val totalHours = (duration / 3600).toInt() // 시간 (3600초)
+                val totalMinutes = ((duration % 3600) / 60).toInt()  // 분
                 val totalSeconds = (duration % 60).toInt() // 초
-                totalTimeTextView.text = String.format("%02d:%02d", totalMinutes, totalSeconds)
+
+                // 포맷을 "HH:MM:SS"로 설정
+                totalTimeTextView.text = String.format("%02d:%02d:%02d", totalHours, totalMinutes, totalSeconds)
 
                 // SeekBar의 최대값을 비디오 총 시간으로 설정
                 seekBar.max = duration.toInt()
@@ -225,9 +229,13 @@ class Fragment1 : Fragment() {
             override fun onCurrentSecond(youTubePlayer: YouTubePlayer, second: Float) {
                 super.onCurrentSecond(youTubePlayer, second)
 
-                val currentMinutes = (second / 60).toInt() // 분
+                // 현재 시간을 시:분:초로 변환
+                val currentHours = (second / 3600).toInt() // 시간 (3600초)
+                val currentMinutes = ((second % 3600) / 60).toInt() // 분
                 val currentSeconds = (second % 60).toInt() // 초
-                currentTimeTextView.text = String.format("%02d:%02d", currentMinutes, currentSeconds)
+
+                // 포맷을 "HH:MM:SS"로 설정
+                currentTimeTextView.text = String.format("%02d:%02d:%02d", currentHours, currentMinutes, currentSeconds)
 
                 // SeekBar의 진행 상황 업데이트 (비디오 진행에 맞춰 업데이트)
                 seekBar.progress = second.toInt()
@@ -320,8 +328,14 @@ class Fragment1 : Fragment() {
             // progress 값을 AirQualityValue에 표시
             AirQualityValue.text = "밝기 : $brightness"
         })
+
+        getCurrentLocation { lat, lon ->
+            getWeatherConditionInfo(lat, lon, aqiViewModel)  // 날씨 상태 가져오기
+        }
         return view
     }
+
+
 
     private fun checkBluetoothPermission() {
         if (ActivityCompat.checkSelfPermission(
@@ -511,16 +525,26 @@ class Fragment1 : Fragment() {
     private fun setupYouTubePlayerListeners() {
         youTubePlayer?.addListener(object : AbstractYouTubePlayerListener() {
             override fun onVideoDuration(youTubePlayer: YouTubePlayer, duration: Float) {
-                val totalMinutes = (duration / 60).toInt()
-                val totalSeconds = (duration % 60).toInt()
-                totalTimeTextView.text = String.format("%02d:%02d", totalMinutes, totalSeconds)
+                // 비디오의 총 시간을 시:분:초로 변환
+                val totalHours = (duration / 3600).toInt() // 시간 (3600초)
+                val totalMinutes = ((duration % 3600) / 60).toInt()  // 분
+                val totalSeconds = (duration % 60).toInt() // 초
+
+                // 포맷을 "HH:MM:SS"로 설정
+                totalTimeTextView.text = String.format("%02d:%02d:%02d", totalHours, totalMinutes, totalSeconds)
+
+                // SeekBar의 최대값을 비디오 총 시간으로 설정
+                seekBar.max = duration.toInt()
                 seekBar.max = duration.toInt()
             }
 
             override fun onCurrentSecond(youTubePlayer: YouTubePlayer, second: Float) {
-                val currentMinutes = (second / 60).toInt()
-                val currentSeconds = (second % 60).toInt()
-                currentTimeTextView.text = String.format("%02d:%02d", currentMinutes, currentSeconds)
+                val currentHours = (second / 3600).toInt() // 시간 (3600초)
+                val currentMinutes = ((second % 3600) / 60).toInt() // 분
+                val currentSeconds = (second % 60).toInt() // 초
+
+                // 포맷을 "HH:MM:SS"로 설정
+                currentTimeTextView.text = String.format("%02d:%02d:%02d", currentHours, currentMinutes, currentSeconds)
                 seekBar.progress = second.toInt()
             }
         })
@@ -675,8 +699,44 @@ class Fragment1 : Fragment() {
             else -> "위험"
         }
     }
-    fun updateWeatherDescription(description: String) {
-        view?.findViewById<TextView>(R.id.text_view_weather_condition)?.text = description
+    private fun getCurrentLocation(onSuccess: (Double, Double) -> Unit) {
+        if (ActivityCompat.checkSelfPermission(requireContext(), Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+            ActivityCompat.requestPermissions(requireActivity(), arrayOf(Manifest.permission.ACCESS_FINE_LOCATION), 1)
+            return
+        }
+
+        fusedLocationClient.lastLocation.addOnSuccessListener(OnSuccessListener<Location?> { location ->
+            if (location != null) {
+                val lat = location.latitude
+                val lon = location.longitude
+                onSuccess(lat, lon)
+            } else {
+                Toast.makeText(requireContext(), "위치를 가져오는 데 실패했습니다.", Toast.LENGTH_SHORT).show()
+            }
+        })
+    }
+
+    private fun getWeatherConditionInfo(lat: Double, lon: Double, bluetoothViewModel: BluetoothViewModel) {
+        val apiKey = apiKey  // OpenWeatherMap API 키
+        val call = RetrofitClient.weatherApiService.getWeather(lat, lon, apiKey)
+
+        call.enqueue(object : Callback<WeatherResponse> {
+            override fun onResponse(call: Call<WeatherResponse>, response: Response<WeatherResponse>) {
+                if (response.isSuccessful) {
+                    val weatherResponse = response.body()
+                    val weatherDescription = weatherResponse?.weather?.get(0)?.description ?: "날씨 정보 없음"
+
+                    // ViewModel을 통해 weatherDescription 값 설정
+                    bluetoothViewModel.setWeatherDescription(weatherDescription)
+                } else {
+                    bluetoothViewModel.setWeatherDescription("날씨 정보를 가져올 수 없습니다.")
+                }
+            }
+
+            override fun onFailure(call: Call<WeatherResponse>, t: Throwable) {
+                bluetoothViewModel.setWeatherDescription("날씨 정보 가져오기 실패: ${t.message}")
+            }
+        })
     }
 
 }

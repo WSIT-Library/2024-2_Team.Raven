@@ -58,15 +58,11 @@ class Fragment2 : Fragment() {
         val textViewWeather: TextView = view.findViewById(R.id.text_view_whether)
 
         textViewBluetoothData = view.findViewById(R.id.text_view_bluetooth_data)
-        textViewInside = view.findViewById(R.id.text_view_inside)
         textViewOutside = view.findViewById(R.id.text_view_outside)
 
-        buttonGetAirQuality.setOnClickListener {
-            getCurrentLocation { lat, lon ->
-                getAirQuality(lat, lon, textViewAirQuality)
-                getLocationInfo(lat, lon, textViewLocation)
-                getWeatherConditionInfo(lat, lon, aqiViewModel)  // 날씨 상태 가져오기
-            }
+        getCurrentLocation { lat, lon ->
+            getAirQuality(lat, lon, textViewAirQuality)
+            getLocationInfo(lat, lon, textViewLocation)
         }
         // 블루투스 데이터 표시 초기화
         displayBluetoothData()
@@ -199,36 +195,11 @@ class Fragment2 : Fragment() {
     private fun compareAQIValues() {
         if (airQualityAQI != null && bluetoothAQI != null) {
             val comparisonResult = when {
-                bluetoothAQI!! > airQualityAQI!! -> "안 좋은 편이에요."
-                bluetoothAQI!! < airQualityAQI!! -> "좋은 편이에요."
-                else -> "양호한 편이에요."
+                bluetoothAQI!! > airQualityAQI!! -> "현재 차내의 공기질이 별로 좋지 않아요."
+                bluetoothAQI!! < airQualityAQI!! -> "현재 차내의 공기질이 괜찮아요."
+                else -> "현재 차내의 공기질은 양호한 편이에요."
             }
             textViewOutside.text = comparisonResult
-
         }
-    }
-
-
-    private fun getWeatherConditionInfo(lat: Double, lon: Double, bluetoothViewModel: BluetoothViewModel) {
-        val apiKey = apiKey  // OpenWeatherMap API 키
-        val call = RetrofitClient.weatherApiService.getWeather(lat, lon, apiKey)
-
-        call.enqueue(object : Callback<WeatherResponse> {
-            override fun onResponse(call: Call<WeatherResponse>, response: Response<WeatherResponse>) {
-                if (response.isSuccessful) {
-                    val weatherResponse = response.body()
-                    val weatherDescription = weatherResponse?.weather?.get(0)?.description ?: "날씨 정보 없음"
-
-                    // ViewModel을 통해 weatherDescription 값 설정
-                    bluetoothViewModel.setWeatherDescription(weatherDescription)
-                } else {
-                    bluetoothViewModel.setWeatherDescription("날씨 정보를 가져올 수 없습니다.")
-                }
-            }
-
-            override fun onFailure(call: Call<WeatherResponse>, t: Throwable) {
-                bluetoothViewModel.setWeatherDescription("날씨 정보 가져오기 실패: ${t.message}")
-            }
-        })
     }
 }
