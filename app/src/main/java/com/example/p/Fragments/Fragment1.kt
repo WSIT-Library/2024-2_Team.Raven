@@ -165,6 +165,7 @@ class Fragment1 : Fragment() {
             val koreanMessage = when (description) {
                 "clear sky" -> "오늘은 하늘이 맑아요."
                 "few clouds" -> "오늘은 약간의 구름이 낀 상태에요."
+                "overcast clouds" -> "오늘은 약간의 구름이 낀 상태에요."
                 "scattered clouds" -> "오늘은 구름이 조금 있는 상태에요."
                 "broken clouds" -> "오늘은 구름이 많이 껴있는 상태에요."
                 "shower rain" -> "오늘은 소나기가 내릴 가능성이 있어요."
@@ -181,6 +182,7 @@ class Fragment1 : Fragment() {
             val weatherImageRes = when (description) {
                 "clear sky" -> R.drawable.sun12 // 화창한 날씨 이미지
                 "few clouds" -> R.drawable.clou // 구름 조금 이미지
+                "overcast clouds" -> R.drawable.clou // 구름 조금 이미지
                 "scattered clouds" -> R.drawable.clou // 흩어진 구름 이미지
                 "broken clouds" -> R.drawable.clou // 구름 많은 이미지
                 "shower rain" -> R.drawable.rain // 소나기 이미지

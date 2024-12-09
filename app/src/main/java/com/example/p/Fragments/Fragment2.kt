@@ -54,10 +54,8 @@ class Fragment2 : Fragment() {
 
         val textViewAirQuality: TextView = view.findViewById(R.id.text_view_air_quality)
         val textViewLocation: TextView = view.findViewById(R.id.text_view_location)
-        val textViewWeather: TextView = view.findViewById(R.id.text_view_whether)
 
         textViewBluetoothData = view.findViewById(R.id.text_view_bluetooth_data)
-        textViewOutside = view.findViewById(R.id.text_view_outside)
 
         getCurrentLocation { lat, lon ->
             getAirQuality(lat, lon, textViewAirQuality)
