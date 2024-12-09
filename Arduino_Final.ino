@@ -96,40 +96,6 @@ int readPulseRate() {
         currentPulseRate = random(59, 120);  // virtual pulse rate data
     }
 
-    // // Check if the current pulse rate is the same as the last
-    // if (currentPulseRate == lastPulseRate) {
-    //     repetitionCount++;
-    // } else {
-    //     repetitionCount = 0;  // Reset count if it's different
-    // }
-
-    // lastPulseRate = currentPulseRate;
-
-    // // If the pulse rate is the same for 3 readings, show RGB values
-    // if (repetitionCount >= 3) {
-    //     // Set LED color based on heart rate
-    //     if (currentPulseRate >= 110) {
-    //         setLEDBrightness(228, 245, 255);  //9000K
-    //         Serial.println("LED: 9000K");
-    //     // Set LED color based on heart rate
-    //     } else if (currentPulseRate >= 100) {
-    //         setLEDBrightness(242, 252, 255);  //8000K
-    //         Serial.println("LED: 8000K");
-    //     } else if (currentPulseRate >= 90) {
-    //         setLEDBrightness(255, 231, 179);  //7000K
-    //         Serial.println("LED: 7000K");
-    //     }else if (currentPulseRate >= 80) {
-    //         setLEDBrightness(255, 219, 153);  //6000K
-    //         Serial.println("LED: 6000K");
-    //     }else if (currentPulseRate >= 70) {
-    //         setLEDBrightness(255, 204, 128);  //5000K
-    //         Serial.println("LED: 5000K");
-    //     }else if (currentPulseRate >= 60) {  
-    //         setLEDBrightness(255, 178, 102);  //4000K
-    //         Serial.println("LED: 4000K");
-    //     }
-    // }
-
     return currentPulseRate;
 }
 
