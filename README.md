@@ -12,3 +12,5 @@ STEP 1. Select Arduino Uno board <br/>
 STEP 2. Verify and Upload code <br/>
 STEP 3. Check Arduino Board Status <br/>
 
+# FastAPI/Capstone_Project
+<h2>서버 코드 입니다. 폴더 자체를 따로 빼서 구동하세요</h2><br/>
